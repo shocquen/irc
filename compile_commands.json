@@ -1,0 +1,7 @@
+[
+  {
+    "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
+    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -c srcs/main.cpp -o obj/main.o",
+    "file": "obj/main.o"
+  }
+]
