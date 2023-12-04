@@ -79,8 +79,7 @@ void Server::run() {
     }
 
     if (poll(pfds, nfds, -1) == -1) {
-      perror("poll");
-      exit(EXIT_FAILURE);
+      throw ServerException("poll", errno);
     }
     for (nfds_t i = 0; i < nfds; i++) {
       if (!(pfds[i].revents & POLLIN))
@@ -89,8 +88,7 @@ void Server::run() {
       if (pfds[i].fd == _fd) {
         if ((newSocket = accept(_fd, (struct sockaddr *)&clientAddress,
                                 &addrlen)) < 0) {
-          perror("accept");
-          exit(EXIT_FAILURE);
+          throw ServerException("accept", errno);
         } else {
           _clients.push_back(Client(newSocket));
         }
@@ -100,8 +98,7 @@ void Server::run() {
         s = recv(pfds[i].fd, buf, BUFFER_SIZE, MSG_DONTWAIT);
         printf("recv() is a succes\n");
         if (s == -1) {
-          perror("read");
-          exit(EXIT_FAILURE);
+          throw ServerException("recv", errno);
         }
         std::vector<Client>::iterator client = _clients.end();
         for (std::vector<Client>::iterator it = _clients.begin();
