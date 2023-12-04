@@ -85,7 +85,6 @@ endef
 SRCS		= main.cpp \
 Client.cpp \
 Server.cpp \
-test.cpp \
 
 
 OBJS		= $(SRCS:.cpp=.o)

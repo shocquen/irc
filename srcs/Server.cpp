@@ -94,9 +94,7 @@ void Server::run() {
         }
       } else {
         bzero(buf, BUFFER_SIZE);
-        printf("About to recv()\n");
         s = recv(pfds[i].fd, buf, BUFFER_SIZE, MSG_DONTWAIT);
-        printf("recv() is a succes\n");
         if (s == -1) {
           throw ServerException("recv", errno);
         }

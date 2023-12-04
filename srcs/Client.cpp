@@ -1,5 +1,6 @@
 #include "Client.hpp"
 #include <sys/poll.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 unsigned long Client::_idCount = 0;
@@ -34,4 +35,9 @@ void Client::disconnect() {
   close(_pfd.fd);
   _pfd.fd = -1;
   std::cout << "Client " << _id << " is disconnected" << std::endl;
+}
+
+void Client::sendMsg(std::string msg) {
+  msg += "\r\n";
+  send(_pfd.fd, msg.c_str(), msg.size(), MSG_DONTWAIT);
 }
