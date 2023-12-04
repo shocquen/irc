@@ -7,6 +7,7 @@
 #define BUFFER_SIZE 2024
 
 int main(void) {
+  // Add parsing for port and pwd
   try {
     Server server("LLD", 4242);
     server.run();
