@@ -60,7 +60,7 @@ endef
 
 define compiling
 	@echo "$(shell tput bold)$(shell tput setaf 3)Compiling $1 $(shell tput sgr0)\c"
-	@$(CC) $(CFLAGS) -I$(INC) -c $1 -o $2
+	@$(CC) $(CFLAGS) -I$(INC) -MMD -MF $(@:.o=.d) -c $1 -o $2
 	@echo "$(shell tput bold)$(shell tput setaf 2)√$(shell tput sgr0)"
 endef
 
@@ -93,7 +93,7 @@ DEPS		= $(addprefix obj/, $(OBJS:.o=.d))
 
 INC		= ./includes
 
-NAME		= ft_irc
+NAME		= ircserv
 RM			= rm -rf
 CC			= c++
 AR			= ar -rcs
@@ -102,6 +102,7 @@ CFLAGS		= -Wall -Wextra -Werror -g3 -std=c++98
 
 ${NAME}:	$(addprefix obj/, $(OBJS))
 			$(call linking,$(NAME))
+-include $(DEPS);
 
 obj/%.o:	srcs/%.cpp
 			@mkdir -p $(@D)
