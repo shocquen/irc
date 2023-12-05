@@ -136,6 +136,13 @@ void Server::run() {
       std::vector<std::string> msgs = client->bufferToMsgs();
       for (size_t i = 0; i < msgs.size(); i++) {
         std::cout << "client[" << client->getId() << "]: " << msgs[i] << std::endl;
+        for (_ClientIterator it = _clients.begin(); it != _clients.end(); it++) {
+          if (it == client)
+            continue ;
+          std::stringstream ss;
+          ss << "client[" << client->getId() << "]: " << msgs[i];
+          it->sendMsg(ss.str());
+        }
       }
     }
   }
