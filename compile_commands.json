@@ -3,5 +3,15 @@
     "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
     "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -c srcs/main.cpp -o obj/main.o",
     "file": "obj/main.o"
+  },
+  {
+    "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
+    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -c srcs/Client.cpp -o obj/Client.o",
+    "file": "obj/Client.o"
+  },
+  {
+    "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
+    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -c srcs/Server.cpp -o obj/Server.o",
+    "file": "obj/Server.o"
   }
 ]
