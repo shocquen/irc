@@ -16,8 +16,11 @@ public:
 
   void disconnect();
   void sendMsg(std::string msg);
+  // Return 1 if the is one or more msg to treat in _buffer.
+  // Else it return 0
   int appendBuffer(std::string buffer);
-  std::vector<std::string> bufferToMsgs(); // Return list of msgs and clear them form _buffer
+  // Return list of msgs and clear them form _buffer
+  std::vector<std::string> bufferToMsgs(); 
 
 private:
   Client();

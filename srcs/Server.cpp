@@ -82,7 +82,7 @@ void Server::_acceptNewClient() {
   }
 }
 
-void Server::_readFromClient(const _ClientIterator &client) {
+int Server::_readFromClient(const _ClientIterator &client) {
   ssize_t s;
   char buf[BUFFER_SIZE];
 
@@ -97,15 +97,10 @@ void Server::_readFromClient(const _ClientIterator &client) {
     client->disconnect();
     _clients.erase(client);
   } else {
-    printf("\tread from %u, %zd bytes: %.*s\n", client->getId(), s,
-           (int)s, buf);
-    if (client->appendBuffer(std::string(buf))) { // If _buffer contain comples msgs
-      std::vector<std::string> msgs = client->bufferToMsgs();
-      for (size_t i = 0; i < msgs.size(); i++) {
-        std::cout << "Msg[" << i << "]: " << msgs[i] << std::endl;
-      }
-    }
+    if (client->appendBuffer(std::string(buf)))
+      return (1);
   }
+  return (0);
 }
 
 void Server::run() {
@@ -135,7 +130,13 @@ void Server::run() {
         throw ServerException("No client found with fd: " + to_string(pfds[i].fd));
       }
 
-      _readFromClient(client);
+      if (_readFromClient(client) == 0) // If now complete msg
+        continue;
+
+      std::vector<std::string> msgs = client->bufferToMsgs();
+      for (size_t i = 0; i < msgs.size(); i++) {
+        std::cout << "client[" << client->getId() << "]: " << msgs[i] << std::endl;
+      }
     }
   }
 }
