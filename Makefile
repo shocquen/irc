@@ -85,6 +85,7 @@ endef
 SRCS		= main.cpp \
 Client.cpp \
 Server.cpp \
+Utils.cpp \
 
 
 OBJS		= $(SRCS:.cpp=.o)
@@ -92,7 +93,7 @@ DEPS		= $(addprefix obj/, $(OBJS:.o=.d))
 
 INC		= ./includes
 
-NAME		= Test
+NAME		= ft_irc
 RM			= rm -rf
 CC			= c++
 AR			= ar -rcs
