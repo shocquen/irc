@@ -32,4 +32,9 @@ private:
   unsigned short _port;
   std::vector<Client> _clients;
   // std::vector<Channel> _channels;
+/* ------------------------------------------------------------------------- */
+  typedef std::vector<Client>::iterator _ClientIterator;
+/* ------------------------------------------------------------------------- */
+  void _acceptNewClient();
+  void _readFromClient(const _ClientIterator &client);
 };

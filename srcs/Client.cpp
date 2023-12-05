@@ -23,6 +23,14 @@ Client & Client::operator=(const Client &rhs) {
 
 Client::~Client() {}
 
+/* ------------------------------------------------------------------------- */
+
+bool Client::operator==(const int &fd) {
+  return _pfd.fd == fd;
+}
+
+/* ------------------------------------------------------------------------- */
+
 int Client::getId() const {
   return (_id);
 }
@@ -30,6 +38,8 @@ int Client::getId() const {
 pollfd_t Client::getPfd() const {
   return (_pfd);
 }
+
+/* ------------------------------------------------------------------------- */
 
 void Client::disconnect() {
   close(_pfd.fd);
@@ -40,4 +50,23 @@ void Client::disconnect() {
 void Client::sendMsg(std::string msg) {
   msg += "\r\n";
   send(_pfd.fd, msg.c_str(), msg.size(), MSG_DONTWAIT);
+}
+
+int Client::appendBuffer(std::string buffer) {
+  _buffer += buffer;
+  if (_buffer.find("\r\n") != std::string::npos)
+    return (1);
+  return (0);
+}
+
+std::vector<std::string> Client::bufferToMsgs() {
+  std::vector<std::string> msgs;
+
+  std::string::size_type pos;
+  while ((pos = _buffer.find("\r\n")) != std::string::npos) {
+    msgs.push_back(_buffer.substr(0, pos));
+    _buffer = _buffer.substr(pos + 2, _buffer.size());
+  }
+
+  return (msgs);
 }

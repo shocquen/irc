@@ -1,7 +1,14 @@
 #include "Server.hpp"
+#include "Utils.hpp"
+#include <algorithm>
 #include <cerrno>
+#include <cstddef>
 #include <cstring>
-#define BUFFER_SIZE 2024
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#define BUFFER_SIZE 5
 
 Server::ServerException::~ServerException() throw() { _msg.clear(); };
 Server::ServerException::ServerException(std::string const msg) : _msg(msg) {}
@@ -62,12 +69,46 @@ Server::~Server(){};
 
 /* ========================================================================= */
 
-void Server::run() {
-  ssize_t s;
-  char buf[BUFFER_SIZE];
+void Server::_acceptNewClient() {
   int newSocket;
   struct sockaddr_in clientAddress;
   socklen_t addrlen = sizeof(clientAddress);
+
+  if ((newSocket = accept(_fd, (struct sockaddr *)&clientAddress,
+                          &addrlen)) < 0) {
+    throw ServerException("accept", errno);
+  } else {
+    _clients.push_back(Client(newSocket));
+  }
+}
+
+void Server::_readFromClient(const _ClientIterator &client) {
+  ssize_t s;
+  char buf[BUFFER_SIZE];
+
+  bzero(buf, BUFFER_SIZE);
+  s = recv(client->getPfd().fd, buf, BUFFER_SIZE - 1, MSG_DONTWAIT);
+  if (s == -1) {
+    throw ServerException("recv", errno);
+  }
+
+  if (s == 0) {
+    std::cout << std::setw(4) << "Client " << client->getId() << " is disconnected" << std::endl;
+    client->disconnect();
+    _clients.erase(client);
+  } else {
+    printf("\tread from %u, %zd bytes: %.*s\n", client->getId(), s,
+           (int)s, buf);
+    if (client->appendBuffer(std::string(buf))) { // If _buffer contain comples msgs
+      std::vector<std::string> msgs = client->bufferToMsgs();
+      for (size_t i = 0; i < msgs.size(); i++) {
+        std::cout << "Msg[" << i << "]: " << msgs[i] << std::endl;
+      }
+    }
+  }
+}
+
+void Server::run() {
   while (true) {
     nfds_t nfds = _clients.size() + 1;
     struct pollfd pfds[nfds];
@@ -84,40 +125,17 @@ void Server::run() {
     for (nfds_t i = 0; i < nfds; i++) {
       if (!(pfds[i].revents & POLLIN))
         continue;
-
       if (pfds[i].fd == _fd) {
-        if ((newSocket = accept(_fd, (struct sockaddr *)&clientAddress,
-                                &addrlen)) < 0) {
-          throw ServerException("accept", errno);
-        } else {
-          _clients.push_back(Client(newSocket));
-        }
-      } else {
-        bzero(buf, BUFFER_SIZE);
-        s = recv(pfds[i].fd, buf, BUFFER_SIZE, MSG_DONTWAIT);
-        if (s == -1) {
-          throw ServerException("recv", errno);
-        }
-        std::vector<Client>::iterator client = _clients.end();
-        for (std::vector<Client>::iterator it = _clients.begin();
-             it != _clients.end(); it++) {
-          if (it->getPfd().fd == pfds[i].fd) {
-            client = it;
-            break;
-          }
-        }
-        if (client == _clients.end()) {
-          std::cerr << "No client found" << std::endl;
-        }
-        if (s == 0) {
-          client->disconnect();
-          printf("\tEreasing fd %d\n", pfds[i].fd);
-          _clients.erase(client);
-        } else {
-          printf("\tread from %u, %zd bytes: %.*s\n", client->getId(), s,
-                 (int)s, buf);
-        }
+        _acceptNewClient();
+        continue;
       }
+
+      _ClientIterator client = std::find(_clients.begin(), _clients.end(), pfds[i].fd);
+      if (client == _clients.end()) {
+        throw ServerException("No client found with fd: " + to_string(pfds[i].fd));
+      }
+
+      _readFromClient(client);
     }
   }
 }

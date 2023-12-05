@@ -9,7 +9,7 @@
 int main(void) {
   // Add parsing for port and pwd
   try {
-    Server server("LLD", 4242);
+    Server server("LLD", 8080);
     server.run();
     server.stop();
   } catch (Server::ServerException err) {
