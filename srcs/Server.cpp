@@ -79,6 +79,7 @@ void Server::_acceptNewClient() {
     throw ServerException("accept", errno);
   } else {
     _clients.push_back(Client(newSocket));
+    std::cout << "New client" << std::endl;
   }
 }
 
