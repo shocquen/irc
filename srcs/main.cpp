@@ -12,7 +12,7 @@ int main(void) {
     Server server("LLD", 8080);
     server.run();
     server.stop();
-  } catch (Server::ServerException err) {
+  } catch (Server::ServerException &err) {
     std::cerr << err.what() << std::endl;
     return (EXIT_SUCCESS);
   }
