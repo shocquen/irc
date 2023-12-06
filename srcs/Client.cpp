@@ -44,7 +44,7 @@ pollfd_t Client::getPfd() const {
 void Client::disconnect() {
   close(_pfd.fd);
   _pfd.fd = -1;
-  std::cout << "Client " << _id << " is disconnected" << std::endl;
+  std::cout << "client[" << _id << "] is disconnected" << std::endl;
 }
 
 void Client::sendMsg(std::string msg) {
