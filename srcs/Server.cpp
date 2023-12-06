@@ -93,7 +93,6 @@ int Server::_readFromClient(const _ClientIterator &client) {
   }
 
   if (s == 0) {
-    std::cout << std::setw(4) << "Client " << client->getId() << " is disconnected" << std::endl;
     client->disconnect();
     _clients.erase(client);
   } else {
