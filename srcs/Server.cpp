@@ -42,7 +42,9 @@ void Server::_handlePASS(const Cmd &cmd) {
   client.validatePwd();
   std::cout << "client[" << client.getId() << "] validate PASS" << std::endl;
 }
-// void Server::_handleNICK(const Cmd &cmd) {}
+// void Server::_handleNICK(const Cmd &cmd) {
+//   Client client = cmd.getAuthor();
+// }
 // void Server::_handleUSER(const Cmd &cmd) {}
 /* ------------------------------------------------------------------------- */
 std::map<std::string, Server::_cmdFuncPtr> Server::initCmdHandlers() {

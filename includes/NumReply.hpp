@@ -16,6 +16,9 @@ public:
   static std::string passwdMismatch(const Cmd &cmd) {
     return _Builder(464, cmd, "Password incorrect");
   }
+  // static std::string nicknameInUse(const Cmd &cmd) {
+  //   return _Builder(433, cmd, "Nickname is already in use");
+  // }
 
 private:
   static std::string _Builder(const unsigned short code, const Cmd &cmd,
