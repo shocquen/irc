@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Cmd.hpp"
+#include "NumReply.hpp"
 #include "Utils.hpp"
 #include <algorithm>
 #include <cerrno>
@@ -27,18 +28,15 @@ const char *Server::ServerException::what() const throw() {
 void Server::_handlePASS(const Cmd &cmd) {
   Client client = cmd.getAuthor();
   if (cmd.getParams().empty()) {
-    client.sendMsg(":localhost 461 " + client.getNick() +
-                   " PASS :Not enough parameters");
+    client.sendMsg(NumReply::needMoreParams(cmd));
     return;
   }
   if (client.isAuth()) {
-    client.sendMsg(":localhost 462" + client.getNick() +
-                   " :You may not reregister");
+    client.sendMsg(NumReply::alreadyRegistered(cmd));
     return;
   }
   if (cmd.getParams().front() != _pwd) {
-    client.sendMsg(":localhost 464 " + client.getNick() +
-                   " :Password incorrect");
+    client.sendMsg(NumReply::passwdMismatch(cmd));
     return;
   }
   client.validatePwd();
