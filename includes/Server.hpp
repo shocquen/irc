@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Client.hpp"
+#include "Cmd.hpp"
 #include <string>
 #include <vector>
 
@@ -24,6 +25,7 @@ public:
     ServerException(std::string const msg, int errnoValue);
     virtual const char *what() const throw();
   };
+  typedef void (Server::*_cmdFuncPtr)(const Cmd &);
 
 private:
   Server();
@@ -39,4 +41,12 @@ private:
   // Return 1 if there is one or more complete msgs to treat.
   // Else return 0.
   int _readFromClient(const _ClientIterator &client);
+/* ------------------------------------------------------------------------- */
+  void _handlePASS(const Cmd &cmd);
+  void _handleNICK(const Cmd &cmd);
+  void _handleUSER(const Cmd &cmd);
+  // void _handleCAP(const Cmd &cmd);
+
+  static std::map<std::string, Server::_cmdFuncPtr> initCmdHandlers();
+  const static std::map<std::string, _cmdFuncPtr> _cmdHandlers;
 };

@@ -27,6 +27,7 @@ This is a very basic broadcast system
 ## Message
 - [ ] finish constructor                                                   *Sou*
   - parse `content` into list of `params` and the `cmd`
+  - Format correctly the error msg sent to the client with the numeric replies
 
 ## Cmds
 - [ ] NICK                                                                 *Sou*

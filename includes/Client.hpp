@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Cmd.hpp"
 #include "irc.hpp"
 #include <string>
 #include <vector>
@@ -13,8 +14,21 @@ public:
 
   int getId() const;
   pollfd_t getPfd() const;
+  bool isAuth() const;
+  bool gavePwd() const;
+  bool isGoodToAuth() const;
+  std::string getUsername() const;
+  std::string getNick() const;
+  std::string getRealName() const;
 
   void disconnect();
+  void auth();
+  void validatePwd();
+
+  void setUsername(std::string username);
+  void setNick(std::string nick);
+  void setRealName(std::string realName);
+
   void sendMsg(std::string msg);
   // Return 1 if the is one or more msg to treat in _buffer.
   // Else it return 0
@@ -24,6 +38,11 @@ public:
 
 private:
   Client();
+  bool _isAuth;
+  bool _validatePwd;
+  std::string _username;
+  std::string _nick;
+  std::string _realName;
   static unsigned long _idCount;
   unsigned long _id;
   pollfd_t _pfd;

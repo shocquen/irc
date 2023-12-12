@@ -86,6 +86,7 @@ SRCS		= main.cpp \
 Client.cpp \
 Server.cpp \
 Utils.cpp \
+Cmd.cpp
 
 
 OBJS		= $(SRCS:.cpp=.o)

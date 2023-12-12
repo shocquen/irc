@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Cmd.hpp"
 #include "Utils.hpp"
 #include <algorithm>
 #include <cerrno>
@@ -20,6 +21,39 @@ Server::ServerException::ServerException(std::string const msg, int errnoValue)
 const char *Server::ServerException::what() const throw() {
   return _msg.c_str();
 }
+
+/* ========================================================================= */
+
+void Server::_handlePASS(const Cmd &cmd) {
+  Client client = cmd.getAuthor();
+  if (cmd.getParams().empty()) {
+    client.sendMsg(":localhost 461 " + client.getNick() +
+                   " PASS :Not enough parameters");
+    return;
+  }
+  if (client.isAuth()) {
+    client.sendMsg(":localhost 462" + client.getNick() +
+                   " :You may not reregister");
+    return;
+  }
+  if (cmd.getParams().front() != _pwd) {
+    client.sendMsg(":localhost 464 " + client.getNick() +
+                   " :Password incorrect");
+    return;
+  }
+  client.validatePwd();
+  std::cout << "client[" << client.getId() << "] validate PASS" << std::endl;
+}
+// void Server::_handleNICK(const Cmd &cmd) {}
+// void Server::_handleUSER(const Cmd &cmd) {}
+/* ------------------------------------------------------------------------- */
+std::map<std::string, Server::_cmdFuncPtr> Server::initCmdHandlers() {
+  std::map<std::string, Server::_cmdFuncPtr> m;
+  m["PASS"] = &Server::_handlePASS;
+  return m;
+}
+const std::map<std::string, Server::_cmdFuncPtr> Server::_cmdHandlers =
+    Server::initCmdHandlers();
 
 /* ========================================================================= */
 
@@ -52,6 +86,7 @@ Server::Server(std::string pwd, unsigned short port) {
     close(_fd);
     throw ServerException("listen", errno);
   }
+  std::cout << "New server listenning on port " << port << std::endl;
 }
 
 Server::Server(const Server &copy) { *this = copy; }
@@ -74,8 +109,8 @@ void Server::_acceptNewClient() {
   struct sockaddr_in clientAddress;
   socklen_t addrlen = sizeof(clientAddress);
 
-  if ((newSocket = accept(_fd, (struct sockaddr *)&clientAddress,
-                          &addrlen)) < 0) {
+  if ((newSocket = accept(_fd, (struct sockaddr *)&clientAddress, &addrlen)) <
+      0) {
     throw ServerException("accept", errno);
   } else {
     _clients.push_back(Client(newSocket));
@@ -125,9 +160,11 @@ void Server::run() {
         continue;
       }
 
-      _ClientIterator client = std::find(_clients.begin(), _clients.end(), pfds[i].fd);
+      _ClientIterator client =
+          std::find(_clients.begin(), _clients.end(), pfds[i].fd);
       if (client == _clients.end()) {
-        throw ServerException("No client found with fd: " + to_string(pfds[i].fd));
+        throw ServerException("No client found with fd: " +
+                              to_string(pfds[i].fd));
       }
 
       if (_readFromClient(client) == 0) // If now complete msg
@@ -135,14 +172,14 @@ void Server::run() {
 
       std::vector<std::string> msgs = client->bufferToMsgs();
       for (size_t i = 0; i < msgs.size(); i++) {
-        std::cout << "client[" << client->getId() << "]: " << msgs[i] << std::endl;
-        for (_ClientIterator it = _clients.begin(); it != _clients.end(); it++) {
-          if (it == client)
-            continue ;
-          std::stringstream ss;
-          ss << "client[" << client->getId() << "]: " << msgs[i];
-          it->sendMsg(ss.str());
-        }
+        std::cout << "client[" << client->getId() << "]: " << msgs[i]
+                  << std::endl;
+
+        Cmd cmd(*client, msgs[i]);
+        if (_cmdHandlers.find(cmd.getName()) == _cmdHandlers.end())
+          continue;
+        _cmdFuncPtr f = _cmdHandlers.at(cmd.getName());
+        (this->*f)(cmd);
       }
     }
   }
