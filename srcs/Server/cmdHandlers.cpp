@@ -15,7 +15,7 @@ const std::map<std::string, Server::_cmdFuncPtr> Server::_cmdHandlers =
 /* ========================================================================= */
 
 void Server::_handlePASS(const Cmd &cmd) {
-  Client client = cmd.getAuthor();
+  Client &client = cmd.getAuthor();
   if (cmd.getParams().empty()) {
     client.sendMsg(NumReply::needMoreParams(cmd));
     return;
@@ -33,7 +33,7 @@ void Server::_handlePASS(const Cmd &cmd) {
 }
 
 void Server::_handleNICK(const Cmd &cmd) {
-  Client client = cmd.getAuthor();
+  Client &client = cmd.getAuthor();
   if (client.isGoodToAuth() == false) {
     _disconnectClient(client, "tried to NICK before PASS");
     return ;
@@ -41,4 +41,10 @@ void Server::_handleNICK(const Cmd &cmd) {
   std::cout << client.isGoodToAuth() << std::endl;
   client.sendMsg(NumReply::nicknameInUse(cmd));
 }
-// void Server::_handleUSER(const Cmd &cmd) {}
+// void Server::_handleUSER(const Cmd &cmd) {
+//   Client client = cmd.getAuthor();
+//   if (client.isGoodToAuth() == false) {
+//     _disconnectClient(client, "tried to USER before PASS");
+//     return ;
+//   }
+// }
