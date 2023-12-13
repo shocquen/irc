@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "NumReply.hpp"
 #include "Server.hpp"
 #include <cerrno>
 #include <cstring>
@@ -27,6 +28,9 @@ Client &Client::operator=(const Client &rhs) {
   _pfd = rhs._pfd;
   _isRegistered = rhs._isRegistered;
   _GoodToRegister = rhs._GoodToRegister;
+  _username = rhs._username;
+  _nick = rhs._nick;
+  _realName = rhs._realName;
   return (*this);
 }
 
@@ -41,6 +45,13 @@ bool Client::operator==(const int &fd) const { return _pfd.fd == fd; }
 unsigned long Client::getId() const { return (_id); }
 pollfd_t Client::getPfd() const { return (_pfd); }
 bool Client::isRegistered() const { return _isRegistered; }
+bool Client::checkRegistered() const{
+  if (isRegistered() == false) {
+    sendMsg(NumReply::notRegistered(*this));
+    return false;
+  }
+  return true;
+}
 bool Client::isGoodToRegister() const {
   return _GoodToRegister;
 }
@@ -50,7 +61,11 @@ std::string Client::getRealName() const { return _realName; }
 
 /* ========================================================================= */
 
-void Client::setRegistered() { _isRegistered = true; }
+void Client::setRegistered() {
+  _isRegistered = true;
+  std::cout << *this << " registered" << std::endl;
+  sendMsg(NumReply::wolcome(*this));
+}
 
 void Client::setGoodToRegister() { _GoodToRegister = true; }
 
@@ -82,7 +97,7 @@ int Client::setNick(std::string nick) {
 
 void Client::setRealName(std::string realName) {
   _realName = realName;
-  std::cout << *this << " set his real name to " << realName<< std::endl;
+  std::cout << *this << " set his real name to " << realName << std::endl;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -96,7 +111,7 @@ void Client::disconnect(std::string ctx) {
   std::cout << std::endl;
 }
 
-void Client::sendMsg(std::string msg) {
+void Client::sendMsg(std::string msg) const {
   std::cout << "to " << *this << " " << msg << std::endl;
   msg += "\r\n";
   send(_pfd.fd, msg.c_str(), msg.size(), MSG_DONTWAIT);

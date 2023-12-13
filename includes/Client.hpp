@@ -18,6 +18,7 @@ public:
   unsigned long getId() const;
   pollfd_t getPfd() const;
   bool isRegistered() const;
+  bool checkRegistered() const;
   bool isGoodToRegister() const;
   std::string getUsername() const;
   std::string getNick() const;
@@ -40,7 +41,7 @@ public:
   /* =========================================================================
    */
 
-  void sendMsg(std::string msg);
+  void sendMsg(std::string msg) const;
   // Return 1 if the is one or more msg to treat in _buffer.
   // Else it return 0
   int appendBuffer(std::string buffer);

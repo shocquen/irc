@@ -43,12 +43,15 @@ private:
   // Return 1 if there is one or more complete msgs to treat.
   // Else return 0.
   int _readFromClient(const _ClientIterator &client);
+  const _ClientConstIterator _getClient(std::string nick) const;
 /* ------------------------------------------------------------------------- */
   bool _isNickUsed(std::string nick) const;
 /* ------------------------------------------------------------------------- */
   void _handlePASS(const Cmd &cmd);
   void _handleNICK(const Cmd &cmd);
   void _handleUSER(const Cmd &cmd);
+  void _handlePING(const Cmd &cmd);
+  void _handlePRIVMSG(const Cmd &cmd);
   // void _handleCAP(const Cmd &cmd);
 
   static std::map<std::string, Server::_cmdFuncPtr> initCmdHandlers();

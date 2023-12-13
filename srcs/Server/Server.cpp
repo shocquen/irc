@@ -109,6 +109,15 @@ bool Server::_isNickUsed(std::string nick) const {
   return (false);
 }
 
+const Server::_ClientConstIterator Server::_getClient(std::string nick) const {
+  for (_ClientConstIterator it = _clients.begin(); it != _clients.end(); it++) {
+    if (it->isRegistered() == false) continue;
+    if (it->getNick() == nick)
+      return it;
+  }
+  return _clients.end();
+}
+
 /* ------------------------------------------------------------------------- */
 
 void Server::run() {
