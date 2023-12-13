@@ -26,11 +26,11 @@ Client &Client::operator=(const Client &rhs) {
 
 Client::~Client() {}
 
-/* ------------------------------------------------------------------------- */
+/* ========================================================================= */
 
 bool Client::operator==(const int &fd) { return _pfd.fd == fd; }
 
-/* ------------------------------------------------------------------------- */
+/* ========================================================================= */
 
 int Client::getId() const { return (_id); }
 pollfd_t Client::getPfd() const { return (_pfd); }
@@ -50,6 +50,7 @@ std::string Client::getRealName() const { return _realName; }
 /* ========================================================================= */
 
 void Client::auth() { _isAuth = true; }
+
 void Client::validatePwd() { _validatePwd = true; }
 
 void Client::setUsername(std::string username) {

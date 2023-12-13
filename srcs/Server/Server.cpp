@@ -1,6 +1,5 @@
 #include "Server.hpp"
 #include "Cmd.hpp"
-#include "NumReply.hpp"
 #include "Utils.hpp"
 #include <algorithm>
 #include <cerrno>
@@ -11,51 +10,6 @@
 #include <sstream>
 #include <string>
 #define BUFFER_SIZE 5
-
-Server::ServerException::~ServerException() throw() { _msg.clear(); };
-Server::ServerException::ServerException(std::string const msg) : _msg(msg) {}
-Server::ServerException::ServerException(std::string const msg, int errnoValue)
-    : _msg(msg) {
-  _msg += ": " + std::string(strerror(errnoValue));
-}
-
-const char *Server::ServerException::what() const throw() {
-  return _msg.c_str();
-}
-
-/* ========================================================================= */
-
-void Server::_handlePASS(const Cmd &cmd) {
-  Client client = cmd.getAuthor();
-  if (cmd.getParams().empty()) {
-    client.sendMsg(NumReply::needMoreParams(cmd));
-    return;
-  }
-  if (client.isAuth()) {
-    client.sendMsg(NumReply::alreadyRegistered(cmd));
-    return;
-  }
-  if (cmd.getParams().front() != _pwd) {
-    client.sendMsg(NumReply::passwdMismatch(cmd));
-    return;
-  }
-  client.validatePwd();
-  std::cout << "client[" << client.getId() << "] validate PASS" << std::endl;
-}
-// void Server::_handleNICK(const Cmd &cmd) {
-//   Client client = cmd.getAuthor();
-// }
-// void Server::_handleUSER(const Cmd &cmd) {}
-/* ------------------------------------------------------------------------- */
-std::map<std::string, Server::_cmdFuncPtr> Server::initCmdHandlers() {
-  std::map<std::string, Server::_cmdFuncPtr> m;
-  m["PASS"] = &Server::_handlePASS;
-  return m;
-}
-const std::map<std::string, Server::_cmdFuncPtr> Server::_cmdHandlers =
-    Server::initCmdHandlers();
-
-/* ========================================================================= */
 
 Server::Server(std::string pwd, unsigned short port) {
   _pwd = pwd;

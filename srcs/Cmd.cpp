@@ -1,11 +1,11 @@
 #include "Cmd.hpp"
+#include "Client.hpp"
 #include <cstddef>
 #include <iomanip>
 #include <sstream>
 #include <string>
-#include "Client.hpp"
 
-Cmd::Cmd(Client &author, std::string content) :_author(author) {
+Cmd::Cmd(Client &author, std::string content) : _author(author) {
   std::stringstream ss(content);
   ss >> _name;
 
@@ -15,7 +15,7 @@ Cmd::Cmd(Client &author, std::string content) :_author(author) {
   while (ss >> word) {
     if (word[0] == ':' && (pos = content.find(" :")) != content.size()) {
       _params.push_back(content.substr(pos + 2));
-      break ;
+      break;
     }
     _params.push_back(word);
   }
@@ -32,19 +32,19 @@ Cmd &Cmd::operator=(const Cmd &rhs) {
 
 Cmd::~Cmd(){};
 
+/* ========================================================================= */
+
 bool Cmd::operator==(const std::string cmdName) const {
   return _name == cmdName;
 }
-/* ------------------------------------------------------------------------- */
+
+/* ========================================================================= */
 
 std::string Cmd::getName() const { return (_name); }
 
-std::vector<std::string> Cmd::getParams() const {
-  return (_params);
-}
-Client &Cmd::getAuthor() const {
-  return _author;
-}
+std::vector<std::string> Cmd::getParams() const { return (_params); }
+
+Client &Cmd::getAuthor() const { return _author; }
 
 /* ========================================================================= */
 
