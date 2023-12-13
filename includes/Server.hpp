@@ -14,7 +14,7 @@ public:
 
   void run();
   void stop();
-
+/* ------------------------------------------------------------------------- */
   class ServerException : public std::exception {
   private:
     std::string _msg;
@@ -36,12 +36,15 @@ private:
   // std::vector<Channel> _channels;
 /* ------------------------------------------------------------------------- */
   typedef std::vector<Client>::iterator _ClientIterator;
+  typedef std::vector<Client>::const_iterator _ClientConstIterator;
 /* ------------------------------------------------------------------------- */
   void _acceptNewClient();
   void _disconnectClient(Client &client, std::string ctx);
   // Return 1 if there is one or more complete msgs to treat.
   // Else return 0.
   int _readFromClient(const _ClientIterator &client);
+/* ------------------------------------------------------------------------- */
+  bool _isNickUsed(std::string nick) const;
 /* ------------------------------------------------------------------------- */
   void _handlePASS(const Cmd &cmd);
   void _handleNICK(const Cmd &cmd);

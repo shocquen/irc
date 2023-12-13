@@ -34,7 +34,7 @@ public:
    */
 
   void setUsername(std::string username);
-  void setNick(std::string nick);
+  int setNick(std::string nick);
   void setRealName(std::string realName);
 
   /* =========================================================================

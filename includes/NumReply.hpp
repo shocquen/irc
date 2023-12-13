@@ -14,19 +14,24 @@ public:
     oss << cmd.getName() << " :Not enough parameters";
     return _Builder(461, oss.str());
   }
-  static std::string alreadyRegistered(const Cmd &cmd) {
-    (void)cmd;
+  static std::string alreadyRegistered() {
     return _Builder(462, ":You may not reregister");
   }
-  static std::string passwdMismatch(const Cmd &cmd) {
-    (void)cmd;
+  static std::string passwdMismatch() {
     return _Builder(464, ":Password incorrect");
   }
+
   static std::string nicknameInUse(const Cmd &cmd) {
-    return _Builder(433, cmd.getAuthor().getNick()
-      + " "
-      + cmd.getParams().front()
-      + " :Nickname is already in use");
+    return _Builder(433, cmd.getAuthor().getNick() + " " +
+                             cmd.getParams().front() +
+                             " :Nickname is already in use");
+  }
+  static std::string noNickNameGiven(const Client &client) {
+    return _Builder(431, client.getNick() + " :No nickname given");
+  }
+  static std::string erroneusNickname(const Cmd &cmd) {
+    return _Builder(432, cmd.getAuthor().getNick() + " " +
+                             cmd.getParams().front() + " :Erroneus nickname");
   }
 
 private:

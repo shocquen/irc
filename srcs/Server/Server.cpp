@@ -101,6 +101,16 @@ int Server::_readFromClient(const _ClientIterator &client) {
   return (0);
 }
 
+bool Server::_isNickUsed(std::string nick) const {
+  for (_ClientConstIterator it = _clients.begin(); it != _clients.end(); it++) {
+    if (it->getNick() == nick)
+      return (true);
+  }
+  return (false);
+}
+
+/* ------------------------------------------------------------------------- */
+
 void Server::run() {
   while (true) {
     nfds_t nfds = _clients.size() + 1;

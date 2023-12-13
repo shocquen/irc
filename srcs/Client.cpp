@@ -66,16 +66,21 @@ void Client::setUsername(std::string username) {
   _username = username;
 }
 
-void Client::setNick(std::string nick) {
-  if (nick.find(" ") != nick.size()) {
-    sendMsg("TODO ERR NICK");
-    return;
-  }
+int Client::setNick(std::string nick) {
   if (nick.empty()) {
-    sendMsg("TODO ERR NICK empty");
-    return;
+    return 1;
+  }
+  if (nick.find(" ") != nick.npos) {
+    return 1;
+  }
+  if (nick.find("#") != nick.npos) {
+    return 1;
+  }
+  if (nick.find(":") != nick.npos) {
+    return 1;
   }
   _nick = nick;
+  return 0;
 }
 
 void Client::setRealName(std::string realName) { _realName = realName; }
@@ -85,19 +90,14 @@ void Client::setRealName(std::string realName) { _realName = realName; }
 void Client::disconnect(std::string ctx) {
   close(_pfd.fd);
   _pfd.fd = -1;
-  std::cout << "client[" << _id << "] is disconnected";
+  std::cout << *this << " is disconnected";
   if (ctx.empty() == false)
     std::cout << ": " << ctx;
   std::cout << std::endl;
 }
 
 void Client::sendMsg(std::string msg) {
-  std::ostringstream target;
-  if (getNick().empty())
-    target << "client[" << getId() << "]";
-  else
-    target << getNick();
-  std::cout << "to " << target.str() << " " << msg << std::endl;
+  std::cout << "to " << *this << " " << msg << std::endl;
   msg += "\r\n";
   send(_pfd.fd, msg.c_str(), msg.size(), MSG_DONTWAIT);
 }
@@ -123,9 +123,11 @@ std::vector<std::string> Client::bufferToMsgs() {
 /* ========================================================================= */
 
 std::ostream &operator<<(std::ostream &stream, const Client &client) {
-  if (client.getNick() == "*")
+  if (client.getNick() != "*")
+    stream << client.getNick();
+  else if (client.getUsername().empty() == false)
     stream << client.getUsername();
   else
-    stream << client.getNick();
+    stream << "client[" << client.getId() << "]";
   return stream;
 }
