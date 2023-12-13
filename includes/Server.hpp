@@ -38,6 +38,7 @@ private:
   typedef std::vector<Client>::iterator _ClientIterator;
 /* ------------------------------------------------------------------------- */
   void _acceptNewClient();
+  void _disconnectClient(Client &client, std::string ctx);
   // Return 1 if there is one or more complete msgs to treat.
   // Else return 0.
   int _readFromClient(const _ClientIterator &client);

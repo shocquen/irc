@@ -2,6 +2,9 @@
 #include "Server.hpp"
 #include <cerrno>
 #include <cstring>
+#include <iostream>
+#include <sstream>
+#include <string>
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -12,7 +15,9 @@ Client::Client(int socket) {
   _id = _idCount++;
   _pfd.fd = socket;
   _pfd.events = POLLIN | POLLOUT;
+
   _isAuth = false;
+  _gavePwd = false;
 }
 
 Client::Client(const Client &copy) { *this = copy; }
@@ -21,6 +26,7 @@ Client &Client::operator=(const Client &rhs) {
   _id = rhs._id;
   _pfd = rhs._pfd;
   _isAuth = rhs._isAuth;
+  _gavePwd = rhs._gavePwd;
   return (*this);
 }
 
@@ -28,30 +34,25 @@ Client::~Client() {}
 
 /* ========================================================================= */
 
-bool Client::operator==(const int &fd) { return _pfd.fd == fd; }
+bool Client::operator==(const int &fd) const { return _pfd.fd == fd; }
 
 /* ========================================================================= */
 
-int Client::getId() const { return (_id); }
+unsigned long Client::getId() const { return (_id); }
 pollfd_t Client::getPfd() const { return (_pfd); }
 bool Client::isAuth() const { return _isAuth; }
-bool Client::gavePwd() const { return _validatePwd; }
 bool Client::isGoodToAuth() const {
-  if (_username.empty() || _nick.empty() || _realName.empty())
-    return (false);
-  return (true);
+  return _gavePwd;
 }
 std::string Client::getUsername() const { return _username; }
-std::string Client::getNick() const {
-  return (_nick.empty() ? _username : _nick);
-}
+std::string Client::getNick() const { return (_nick.empty() ? "*" : _nick); }
 std::string Client::getRealName() const { return _realName; }
 
 /* ========================================================================= */
 
 void Client::auth() { _isAuth = true; }
 
-void Client::validatePwd() { _validatePwd = true; }
+void Client::validatePwd() { _gavePwd = true; }
 
 void Client::setUsername(std::string username) {
   if (_isAuth) {
@@ -81,13 +82,22 @@ void Client::setRealName(std::string realName) { _realName = realName; }
 
 /* ------------------------------------------------------------------------- */
 
-void Client::disconnect() {
+void Client::disconnect(std::string ctx) {
   close(_pfd.fd);
   _pfd.fd = -1;
-  std::cout << "client[" << _id << "] is disconnected" << std::endl;
+  std::cout << "client[" << _id << "] is disconnected";
+  if (ctx.empty() == false)
+    std::cout << ": " << ctx;
+  std::cout << std::endl;
 }
 
 void Client::sendMsg(std::string msg) {
+  std::ostringstream target;
+  if (getNick().empty())
+    target << "client[" << getId() << "]";
+  else
+    target << getNick();
+  std::cout << "to " << target.str() << " " << msg << std::endl;
   msg += "\r\n";
   send(_pfd.fd, msg.c_str(), msg.size(), MSG_DONTWAIT);
 }
@@ -108,4 +118,14 @@ std::vector<std::string> Client::bufferToMsgs() {
     _buffer = _buffer.substr(pos + 2, _buffer.size());
   }
   return (msgs);
+}
+
+/* ========================================================================= */
+
+std::ostream &operator<<(std::ostream &stream, const Client &client) {
+  if (client.getNick() == "*")
+    stream << client.getUsername();
+  else
+    stream << client.getNick();
+  return stream;
 }

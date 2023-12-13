@@ -72,6 +72,15 @@ void Server::_acceptNewClient() {
   }
 }
 
+void Server::_disconnectClient(Client &client, std::string ctx) {
+  _ClientIterator target =
+      std::find(_clients.begin(), _clients.end(), client.getPfd().fd);
+  if (target != _clients.end()) {
+    client.disconnect(ctx);
+    _clients.erase(target);
+  }
+}
+
 int Server::_readFromClient(const _ClientIterator &client) {
   ssize_t s;
   char buf[BUFFER_SIZE];
@@ -83,7 +92,7 @@ int Server::_readFromClient(const _ClientIterator &client) {
   }
 
   if (s == 0) {
-    client->disconnect();
+    client->disconnect("");
     _clients.erase(client);
   } else {
     if (client->appendBuffer(std::string(buf)))
