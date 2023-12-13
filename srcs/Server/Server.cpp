@@ -76,6 +76,7 @@ void Server::_disconnectClient(Client &client, std::string ctx) {
   _ClientIterator target =
       std::find(_clients.begin(), _clients.end(), client.getPfd().fd);
   if (target != _clients.end()) {
+    client.sendMsg("ERROR :" + ctx);
     client.disconnect(ctx);
     _clients.erase(target);
   }

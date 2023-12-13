@@ -40,7 +40,6 @@ void Server::_handlePASS(const Cmd &cmd) {
 void Server::_handleNICK(const Cmd &cmd) {
   Client &client = cmd.getAuthor();
   if (client.isGoodToRegister() == false) {
-    client.sendMsg("ERROR :tried to NICK before PASS");
     _disconnectClient(client, "tried to NICK before PASS");
     return;
   }
