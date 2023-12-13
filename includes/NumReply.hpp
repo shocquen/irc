@@ -14,9 +14,6 @@ public:
     oss << cmd.getName() << " :Not enough parameters";
     return _Builder(461, oss.str());
   }
-  static std::string alreadyRegistered() {
-    return _Builder(462, ":You may not reregister");
-  }
   static std::string passwdMismatch() {
     return _Builder(464, ":Password incorrect");
   }
@@ -32,6 +29,9 @@ public:
   static std::string erroneusNickname(const Cmd &cmd) {
     return _Builder(432, cmd.getAuthor().getNick() + " " +
                              cmd.getParams().front() + " :Erroneus nickname");
+  }
+  static std::string alreadyRegistered(const Client &client) {
+    return _Builder(462, client.getNick() + " :You may not reregister");
   }
 
 private:

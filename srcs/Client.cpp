@@ -16,8 +16,8 @@ Client::Client(int socket) {
   _pfd.fd = socket;
   _pfd.events = POLLIN | POLLOUT;
 
-  _isAuth = false;
-  _gavePwd = false;
+  _isRegistered = false;
+  _GoodToRegister = false;
 }
 
 Client::Client(const Client &copy) { *this = copy; }
@@ -25,8 +25,8 @@ Client::Client(const Client &copy) { *this = copy; }
 Client &Client::operator=(const Client &rhs) {
   _id = rhs._id;
   _pfd = rhs._pfd;
-  _isAuth = rhs._isAuth;
-  _gavePwd = rhs._gavePwd;
+  _isRegistered = rhs._isRegistered;
+  _GoodToRegister = rhs._GoodToRegister;
   return (*this);
 }
 
@@ -40,9 +40,9 @@ bool Client::operator==(const int &fd) const { return _pfd.fd == fd; }
 
 unsigned long Client::getId() const { return (_id); }
 pollfd_t Client::getPfd() const { return (_pfd); }
-bool Client::isAuth() const { return _isAuth; }
-bool Client::isGoodToAuth() const {
-  return _gavePwd;
+bool Client::isRegistered() const { return _isRegistered; }
+bool Client::isGoodToRegister() const {
+  return _GoodToRegister;
 }
 std::string Client::getUsername() const { return _username; }
 std::string Client::getNick() const { return (_nick.empty() ? "*" : _nick); }
@@ -50,40 +50,40 @@ std::string Client::getRealName() const { return _realName; }
 
 /* ========================================================================= */
 
-void Client::auth() { _isAuth = true; }
+void Client::setRegistered() { _isRegistered = true; }
 
-void Client::validatePwd() { _gavePwd = true; }
+void Client::setGoodToRegister() { _GoodToRegister = true; }
 
-void Client::setUsername(std::string username) {
-  if (_isAuth) {
-    sendMsg("TODO ERR userame");
-    return;
-  }
-  if (username.empty()) {
-    sendMsg("TODO ERR username empty");
-    return;
-  }
+int Client::setUsername(std::string username) {
+  if (username.empty())
+    return 1;
+  if (username.find(" ") != username.npos)
+    return 1;
+
   _username = username;
+  std::cout << *this << " set his username to " << username << std::endl;
+  return 0;
 }
 
 int Client::setNick(std::string nick) {
-  if (nick.empty()) {
+  if (nick.empty())
     return 1;
-  }
-  if (nick.find(" ") != nick.npos) {
+  if (nick.find(" ") != nick.npos)
     return 1;
-  }
-  if (nick.find("#") != nick.npos) {
+  if (nick.find("#") != nick.npos)
     return 1;
-  }
-  if (nick.find(":") != nick.npos) {
+  if (nick.find(":") != nick.npos)
     return 1;
-  }
+
+  std::cout << *this << " changed his nickname to " << nick << std::endl;
   _nick = nick;
   return 0;
 }
 
-void Client::setRealName(std::string realName) { _realName = realName; }
+void Client::setRealName(std::string realName) {
+  _realName = realName;
+  std::cout << *this << " set his real name to " << realName<< std::endl;
+}
 
 /* ------------------------------------------------------------------------- */
 

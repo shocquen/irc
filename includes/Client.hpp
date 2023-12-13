@@ -17,8 +17,8 @@ public:
 
   unsigned long getId() const;
   pollfd_t getPfd() const;
-  bool isAuth() const;
-  bool isGoodToAuth() const;
+  bool isRegistered() const;
+  bool isGoodToRegister() const;
   std::string getUsername() const;
   std::string getNick() const;
   std::string getRealName() const;
@@ -27,13 +27,13 @@ public:
    */
 
   void disconnect(std::string ctx);
-  void auth();
-  void validatePwd();
+  void setRegistered();
+  void setGoodToRegister();
 
   /* =========================================================================
    */
 
-  void setUsername(std::string username);
+  int setUsername(std::string username);
   int setNick(std::string nick);
   void setRealName(std::string realName);
 
@@ -51,8 +51,8 @@ private:
   Client();
   static unsigned long _idCount;
 
-  bool                 _gavePwd;
-  bool                 _isAuth;
+  bool                 _GoodToRegister;
+  bool                 _isRegistered;
   pollfd_t             _pfd;
   std::string          _buffer;
   std::string          _nick;

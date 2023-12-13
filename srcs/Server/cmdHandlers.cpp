@@ -8,6 +8,7 @@ std::map<std::string, Server::_cmdFuncPtr> Server::initCmdHandlers() {
   std::map<std::string, Server::_cmdFuncPtr> m;
   m["PASS"] = &Server::_handlePASS;
   m["NICK"] = &Server::_handleNICK;
+  m["USER"] = &Server::_handleUSER;
   return m;
 }
 
@@ -22,21 +23,21 @@ void Server::_handlePASS(const Cmd &cmd) {
     client.sendMsg(NumReply::needMoreParams(cmd));
     return;
   }
-  if (client.isAuth()) {
-    client.sendMsg(NumReply::alreadyRegistered());
+  if (client.isRegistered()) {
+    client.sendMsg(NumReply::alreadyRegistered(cmd.getAuthor()));
     return;
   }
   if (cmd.getParams().front() != _pwd) {
     client.sendMsg(NumReply::passwdMismatch());
     return;
   }
-  client.validatePwd();
+  client.setGoodToRegister();
   std::cout << "client[" << client.getId() << "] validate PASS" << std::endl;
 }
 
 void Server::_handleNICK(const Cmd &cmd) {
   Client &client = cmd.getAuthor();
-  if (client.isGoodToAuth() == false) {
+  if (client.isGoodToRegister() == false) {
     _disconnectClient(client, "tried to NICK before PASS");
     return;
   }
@@ -50,23 +51,39 @@ void Server::_handleNICK(const Cmd &cmd) {
     client.sendMsg(NumReply::nicknameInUse(cmd));
     return;
   }
-  std::ostringstream cl;
-  cl << client;
   if (client.setNick(nick)) {
     client.sendMsg(NumReply::erroneusNickname(cmd));
     return;
   }
-  std::cout << cl.str() << " changed his nickname to " << nick << std::endl;
 
   if (client.getUsername().empty() == false) {
-    
+    client.setRegistered();
   }
 }
 
 void Server::_handleUSER(const Cmd &cmd) {
   Client &client = cmd.getAuthor();
-  if (client.isGoodToAuth() == false) {
+  if (client.isGoodToRegister() == false) {
     _disconnectClient(client, "tried to USER before PASS");
-    return ;
+    return;
+  }
+  if (client.isRegistered()) {
+    client.sendMsg(NumReply::alreadyRegistered(client));
+    return;
+  }
+  if (cmd.getParams().size() != 4) {
+    client.sendMsg(NumReply::needMoreParams(cmd));
+    return;
+  }
+  std::string username = cmd.getParams().front();
+  std::string realname = cmd.getParams().back();
+  if (realname.size() < 1 || username.size() < 1) {
+    client.sendMsg(NumReply::needMoreParams(cmd));
+    return;
+  }
+  client.setUsername(username);
+  client.setRealName(realname);
+  if (client.getNick() != "*") {
+    client.setRegistered();
   }
 }
