@@ -15,3 +15,4 @@
 #include <vector>
 
 typedef struct pollfd pollfd_t;
+extern int status_g;

@@ -10,7 +10,11 @@ public:
   Client(const Client &copy);
   ~Client();
   Client &operator=(const Client &rhs);
+
   bool operator==(const int &fd) const;
+  bool operator==(const Client &rhs) const;
+  bool operator==(const std::string nick) const;
+  bool operator==(const std::vector<Client*>::const_iterator &rhs) const;
 
   /* =========================================================================
    */

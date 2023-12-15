@@ -11,17 +11,37 @@
   },
   {
     "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
-    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -MMD -MF obj/Server.d -c srcs/Server.cpp -o obj/Server.o",
-    "file": "obj/Server.o"
-  },
-  {
-    "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
     "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -MMD -MF obj/Utils.d -c srcs/Utils.cpp -o obj/Utils.o",
     "file": "obj/Utils.o"
   },
   {
     "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
-    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -MMD -MF obj/Message.d -c srcs/Message.cpp -o obj/Message.o",
-    "file": "obj/Message.o"
+    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -MMD -MF obj/Cmd.d -c srcs/Cmd.cpp -o obj/Cmd.o",
+    "file": "obj/Cmd.o"
+  },
+  {
+    "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
+    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -MMD -MF obj/Server/cmdHandlers.d -c srcs/Server/cmdHandlers.cpp -o obj/Server/cmdHandlers.o",
+    "file": "obj/Server/cmdHandlers.o"
+  },
+  {
+    "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
+    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -MMD -MF obj/Server/Execption.d -c srcs/Server/Execption.cpp -o obj/Server/Execption.o",
+    "file": "obj/Server/Execption.o"
+  },
+  {
+    "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
+    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -MMD -MF obj/Server/Server.d -c srcs/Server/Server.cpp -o obj/Server/Server.o",
+    "file": "obj/Server/Server.o"
+  },
+  {
+    "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
+    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -MMD -MF obj/Channel/Channel.d -c srcs/Channel/Channel.cpp -o obj/Channel/Channel.o",
+    "file": "obj/Channel/Channel.o"
+  },
+  {
+    "directory": "/mnt/nfs/homes/shocquen/Documents/IRC",
+    "command": "c++ -Wall -Wextra -Werror -g3 -std=c++98  -I./includes -MMD -MF obj/Channel/methods.d -c srcs/Channel/methods.cpp -o obj/Channel/methods.o",
+    "file": "obj/Channel/methods.o"
   }
 ]

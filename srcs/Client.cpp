@@ -9,6 +9,7 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <vector>
 
 unsigned long Client::_idCount = 0;
 
@@ -39,22 +40,17 @@ Client::~Client() {}
 /* ========================================================================= */
 
 bool Client::operator==(const int &fd) const { return _pfd.fd == fd; }
+bool Client::operator==(const Client &rhs) const { return _id == rhs._id; }
+bool Client::operator==(const std::string nick) const { return _nick == nick; }
+bool Client::operator==(const std::vector<Client*>::const_iterator &rhs) const { return _id == (*rhs)->_id; }
 
 /* ========================================================================= */
 
 unsigned long Client::getId() const { return (_id); }
 pollfd_t Client::getPfd() const { return (_pfd); }
 bool Client::isRegistered() const { return _isRegistered; }
-bool Client::checkRegistered() const{
-  if (isRegistered() == false) {
-    sendMsg(NumReply::notRegistered(*this));
-    return false;
-  }
-  return true;
-}
-bool Client::isGoodToRegister() const {
-  return _GoodToRegister;
-}
+bool Client::checkRegistered() const { return (isRegistered()); }
+bool Client::isGoodToRegister() const { return _GoodToRegister; }
 std::string Client::getUsername() const { return _username; }
 std::string Client::getNick() const { return (_nick.empty() ? "*" : _nick); }
 std::string Client::getRealName() const { return _realName; }

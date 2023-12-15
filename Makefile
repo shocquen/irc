@@ -89,6 +89,8 @@ Cmd.cpp \
 Server/cmdHandlers.cpp \
 Server/Execption.cpp \
 Server/Server.cpp \
+Channel/Channel.cpp \
+Channel/methods.cpp \
 
 
 OBJS		= $(SRCS:.cpp=.o)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Client.hpp"
+#include "Channel.hpp"
 #include "Cmd.hpp"
 #include <iostream>
 #include <ostream>
@@ -13,12 +14,30 @@ public:
                              client.getNick() + "!" + client.getUsername() +
                              "@localhost");
   }
+
+  static std::string topic(const Client &client, const Channel &chan) {
+    return _Builder("332", client.getNick() + " " + chan.getName() + " :" + chan.getTopic());
+  }
+
+  static std::string namReply(const Client &client, const Channel &chan) {
+    std::ostringstream oss;
+    oss << client.getNick() << " = ";
+    oss << chan.getName();
+    oss << " :" << chan.listMembers();
+    return _Builder("353", oss.str());
+  }
+
+  static std::string endOfNames(const Client &client, const Channel &chan) {
+    return _Builder("366", client.getNick() + " " + chan.getName() + " :End of NAMES list");
+  }
+/* ========================================================================= */
   static std::string needMoreParams(const Cmd &cmd) {
     std::ostringstream oss;
     oss << cmd.getAuthor().getNick() << " ";
     oss << cmd.getName() << " :Not enough parameters";
     return _Builder("461", oss.str());
   }
+
   static std::string passwdMismatch() {
     return _Builder("464", ":Password incorrect");
   }
