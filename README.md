@@ -11,27 +11,36 @@ nc -vC 127.0.0.1 8080 // At the moment
 [Workflow Exemple](http://chi.cs.uchicago.edu/chirc/irc_examples.html)
 [RPL ERR list](https://www.alien.net.au/irc/irc2numerics.html) 
 
-
-# ATM
-This is a very basic broadcast system
-
-
 # TODO
 ## main
 - [ ] args parser                                                          *Sou*
   - port
-    - Is the port is a `short` ?
+    - is the arg only digit?
   - password
-    - I think there is restrictions ?
+    - I think there is restrictions?
 
-## Message
-- [ ] finish constructor                                                   *Sou*
-  - parse `content` into list of `params` and the `cmd`
-  - Format correctly the error msg sent to the client with the numeric replies
 
 ## Cmds
-- [ ] NICK                                                                 *Sou*
-- [ ] USER                                                                 *Sou*
-- [ ] PRIVMSG                                                              *Sou*
-*First do the cmds to logging into the ircserv*
-- [ ] ...
+- [x] PASS
+- [x] NICK
+- [x] USER
+- [x] PING
+- [x] PRIVMSG
+- [x] JOIN
+*Channel*
+- [ ] KICK
+- [ ] INVITE
+- [ ] TOPIC
+- [ ] MODE
+  - i: Set/remove Invite-only channel
+  - t: Set/remove the restrictions of the TOPIC command to channel operators
+  - k: Set/remove the channel key (password)
+  - o: Give/take channel operator privilege
+  - l: Set/remove the user limit to channel
+
+## Bot
+```bash
+  ./bot <host> <port> <psw>
+```
+- [ ] Register to server
+- [ ] Respond pong on PRIVMSG
