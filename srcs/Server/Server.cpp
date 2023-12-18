@@ -183,7 +183,7 @@ void Server::run() {
 
       std::vector<std::string> msgs = client->bufferToMsgs();
       for (size_t i = 0; i < msgs.size(); i++) {
-        std::cout << "client[" << client->getId() << "]: " << msgs[i]
+        std::cout << *client << ": " << msgs[i]
                   << std::endl;
 
         Cmd cmd(*client, msgs[i]);

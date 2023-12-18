@@ -108,7 +108,7 @@ void Client::disconnect(std::string ctx) {
 }
 
 void Client::sendMsg(std::string msg) const {
-  std::cout << "to " << *this << " " << msg << std::endl;
+  std::cout << "-> " << *this << ": " << msg << std::endl;
   msg += "\r\n";
   send(_pfd.fd, msg.c_str(), msg.size(), MSG_DONTWAIT);
 }
