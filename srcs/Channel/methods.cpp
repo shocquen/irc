@@ -8,6 +8,8 @@
 
 void Channel::setName(std::string name) { _name = name; }
 
+void Channel::setKey(std::string key) { _key = key; }
+
 // setTopic and send it to members
 void Channel::setTopic(std::string topic) {
   _topic = topic;
@@ -15,6 +17,8 @@ void Channel::setTopic(std::string topic) {
     (*it)->sendMsg(NumReply::topic(*(*it), *this));
   }
 }
+
+void Channel::setMemberLimit(unsigned long limit) { _memberLimit = limit; }
 /* ========================================================================= */
 void Channel::addMember(Client *m) { _members.push_back(m); }
 
@@ -24,8 +28,8 @@ void Channel::kickMember(const Client &m, const Client &op, std::string ctx) {
   if (ctx.empty())
     ctx = "is kicked";
 
-  sendMsg(":" + op.getNick() + "!" + op.getUsername() + "@localhost" + " KICK " + getName() + " " + m.getNick() + " :" +
-          ctx);
+  sendMsg(":" + op.getNick() + "!" + op.getUsername() + "@localhost" +
+          " KICK " + getName() + " " + m.getNick() + " :" + ctx);
   _members.erase(it);
 }
 
@@ -57,11 +61,12 @@ void Channel::toggleOnInvite() { _onInvite = !_onInvite; }
 
 void Channel::toggleTopicProtection() { _topicProtection = !_topicProtection; }
 
-void Channel::toggleOnPwd() { _onPwd = !_onPwd; }
 /* ========================================================================= */
 Client &Channel::getAuthor() const { return _author; }
 
 std::string Channel::getName() const { return _name; }
+
+std::string Channel::getKey() const { return _key; }
 
 std::string Channel::getTopic() const { return _topic; }
 
@@ -74,6 +79,8 @@ std::string Channel::listMembers() const {
   }
   return oss.str();
 }
+
+unsigned long Channel::getMemberLimit() const { return _memberLimit; }
 /* ------------------------------------------------------------------------- */
 bool Channel::isMember(const Client &c) const {
   _ClientConstIt target = std::find(_members.begin(), _members.end(), &c);
@@ -102,6 +109,7 @@ bool Channel::ClientHasPriv(const Client &c) const {
 }
 
 bool Channel::isTopicProtected() const { return _topicProtection; }
+bool Channel::isOnInvite() const { return _onInvite; }
 /* ========================================================================= */
 void Channel::sendMsg(std::string msg) const {
   for (_ClientConstIt it = _members.begin(); it != _members.end(); it++) {

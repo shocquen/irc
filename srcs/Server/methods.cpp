@@ -1,6 +1,6 @@
-#include "Server.hpp"
 #include "Cmd.hpp"
 #include "NumReply.hpp"
+#include "Server.hpp"
 #include "Utils.hpp"
 #include "irc.hpp"
 #define BUFFER_SIZE 5
@@ -67,6 +67,13 @@ const Server::_ClientConstIt Server::_getConstClient(std::string nick) const {
   return _clients.end();
 }
 
+void Server::_addNewChannel(Client &client, const std::string name,
+                            const std::string key) {
+  
+  Channel newChan(client, name, key);
+  newChan.addMember(&client);
+  _channels.push_back(newChan);
+}
 const Server::_ChannelConstIt Server::_getConstChannel(std::string name) const {
   for (_ChannelConstIt it = _channels.begin(); it != _channels.end(); it++) {
     if (*it == name)
@@ -90,5 +97,3 @@ const Server::_ChannelIt Server::_getChannel(const Channel &rhs) {
   }
   return _channels.end();
 }
-
-

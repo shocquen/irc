@@ -5,7 +5,7 @@
 #include <string>
 class Channel {
 public:
-  Channel(Client &author, const std::string name);
+  Channel(Client &author, const std::string name, const std::string key);
   Channel(const Channel &copy);
   ~Channel();
   Channel &operator=(const Channel &rhs);
@@ -25,15 +25,18 @@ public:
 /* ------------------------------------------------------------------------- */
   void toggleOnInvite();
   void toggleTopicProtection();
-  void toggleOnPwd();
 /* ------------------------------------------------------------------------- */
   void setName(std::string);
+  void setKey(std::string);
   void setTopic(std::string topic);
+  void setMemberLimit(unsigned long memberLimit);
 /* ========================================================================= */
   Client &getAuthor() const;
   std::string getName() const;
+  std::string getKey() const;
   std::string getTopic() const;
   std::string listMembers() const;
+  unsigned long getMemberLimit() const;
 /* ------------------------------------------------------------------------- */
   bool isMember(const Client &) const;
   bool isBannedMember(const Client &) const;
@@ -41,6 +44,7 @@ public:
   bool isOperator(const Client &)const;
   bool ClientHasPriv(const Client &) const;
   bool isTopicProtected() const;
+  bool isOnInvite() const;
 /* ========================================================================= */
   void sendMsg(std::string msg) const;
   void sendMsg(const Client &author, std::string msg) const;
@@ -51,7 +55,7 @@ private:
 
   Client              &_author;
   std::string          _name;
-  std::string          _pwd;
+  std::string          _key;
   std::string          _topic;
   std::vector<Client*> _members;
   std::vector<Client*> _membersBanned;
@@ -61,7 +65,6 @@ private:
   unsigned long        _memberLimit;
   bool                 _onInvite;
   bool                 _topicProtection;
-  bool                 _onPwd;
 /* ========================================================================= */
   typedef std::vector<Client*>::const_iterator _ClientConstIt;
   typedef std::vector<Client*>::iterator _ClientIt;

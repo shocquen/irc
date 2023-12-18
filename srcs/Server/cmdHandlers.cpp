@@ -3,9 +3,11 @@
 #include "Cmd.hpp"
 #include "NumReply.hpp"
 #include "Server.hpp"
+#include "Utils.hpp"
 #include <cstddef>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 std::map<std::string, Server::CmdMiddleWare> Server::initCmdHandlers() {
   std::map<std::string, Server::CmdMiddleWare> m;
@@ -114,7 +116,8 @@ void Server::_handlePRIVMSG(const Cmd &cmd) {
   std::string targetNick = cmd.getParams().front();
   std::string msg = cmd.getParams().back();
   std::ostringstream oss;
-  oss << ":" << client.getNick() << "!" << client.getUsername() << "@localhost ";
+  oss << ":" << client.getNick() << "!" << client.getUsername()
+      << "@localhost ";
   oss << cmd.getName() << " ";
   if (targetNick[0] == '#') {
     const _ChannelConstIt target = _getConstChannel(targetNick);
@@ -143,30 +146,38 @@ void Server::_handleJOIN(const Cmd &cmd) {
     client.sendMsg(NumReply::needMoreParams(cmd));
     return;
   }
-  
-  std::string chanName = cmd.getParams().front();
-  if (chanName[0] != '#') {
-    client.sendMsg(NumReply::badChanMask(chanName));
-    return;
-  }
 
-  _ChannelIt chan = _getChannel(chanName);
-  if (chan != _channels.end()) { // The chan already exist
-    chan->addMember(&client);
-  } else { // Create a chan
-    Channel newChan(client, chanName);
-    newChan.addMember(&client);
-    _channels.push_back(newChan);
-    chan = _getChannel(newChan);
+  std::vector<std::string> names = split(cmd.getParams().front(), ",");
+  std::vector<std::string> keys = split(cmd.getParams().at(1), ",");
+  if (names.size() != keys.size())
+    return;
+  std::vector<std::string>::const_iterator nameIt, keyIt;
+  for (nameIt = names.begin(), keyIt = keys.begin();
+       nameIt != names.end() && keyIt != keys.end(); nameIt++, keyIt++) {
+    if (nameIt->empty())
+      continue;
+
+    _ChannelIt chan = _getChannel(*nameIt);
+    if (chan != _channels.end()) { // The chan already exist
+      // TODO check onIvite chan
+      if (chan->getKey() == *keyIt)
+        chan->addMember(&client);
+      else {
+        client.sendMsg(NumReply::badChannelKey(chan->getName()));
+        continue;
+      }
+    } else { // Create a chan
+      _addNewChannel(client, *nameIt, *keyIt);
+      chan = _getChannel(*nameIt);
+    }
+
+    chan->sendMsg(":" + client.getNick() + "!" + client.getUsername() +
+                  "@localhost " + "JOIN " + chan->getName());
+    if (chan->getTopic().empty() == false)
+      client.sendMsg(NumReply::topic(client, *chan));
+    client.sendMsg(NumReply::namReply(client, *chan));
+    client.sendMsg(NumReply::endOfNames(client, *chan));
   }
-  chan->sendMsg(
-       ":" + client.getNick() + "!" + client.getUsername() + "@localhost "
-       + "JOIN " + chan->getName()
-  );
-  if (chan->getTopic().empty() == false)
-    client.sendMsg(NumReply::topic(client, *chan));
-  client.sendMsg(NumReply::namReply(client, *chan));
-  client.sendMsg(NumReply::endOfNames(client, *chan));
 }
 
 void Server::_handleTOPIC(const Cmd &cmd) {
@@ -188,7 +199,7 @@ void Server::_handleTOPIC(const Cmd &cmd) {
   if (cmd.getParams().size() == 1) { // client wanna get the topic
     if (chan->getTopic().empty()) {
       client.sendMsg(NumReply::noTopic(client, *chan));
-      return ;
+      return;
     }
     client.sendMsg(NumReply::topic(client, *chan));
   } else if (cmd.getParams().size() == 2) { // client wanna change the topic
@@ -219,35 +230,22 @@ void Server::_handleKICK(const Cmd &cmd) {
     return;
   }
 
-  std::string targetParam = cmd.getParams().at(1);
   std::string ctx = cmd.getParams().size() > 2 ? cmd.getParams().back() : "";
-
-  size_t end = targetParam.find(",");
-  while (end != targetParam.npos) {
-    std::string targetNick = targetParam.substr(0, end);
-    targetParam.erase(0, end + 1);
-    _ClientConstIt target = _getConstClient(targetNick);
+  std::vector<std::string> targetsNick = split(cmd.getParams().at(1), ",");
+  std::vector<std::string>::const_iterator it;
+  for (it = targetsNick.begin(); it != targetsNick.end(); it++) {
+    _ClientConstIt target = _getConstClient(*it);
     if (target == _clients.end())
       continue;
     if (chan->isMember(*target) == false) {
-      client.sendMsg(NumReply::userNotInChannel(client, target->getNick(), *chan));
+      client.sendMsg(
+          NumReply::userNotInChannel(client, target->getNick(), *chan));
       continue;
     }
     if (chan->ClientHasPriv(*target))
       continue;
     chan->kickMember(*target, client, ctx);
   }
-
-  _ClientConstIt target = _getConstClient(targetParam);
-  if (target == _clients.end())
-    return;
-  if (chan->isMember(*target) == false) {
-    client.sendMsg(NumReply::userNotInChannel(client, target->getNick(), *chan));
-    return;
-  }
-  if (chan->ClientHasPriv(*target)) // Dont kick an Op
-    return;
-  chan->kickMember(*target, client, ctx);
 }
 
 void Server::_handleNAMES(const Cmd &cmd) {
@@ -268,5 +266,22 @@ void Server::_handleNAMES(const Cmd &cmd) {
 
 void Server::_handleMODE(const Cmd &cmd) {
   Client &client = cmd.getAuthor();
-  (void)client;
+  if (cmd.getParams().empty()) {
+    client.sendMsg(NumReply::needMoreParams(cmd));
+    return;
+  }
+  std::string targetName = cmd.getParams().at(0);
+  if (targetName.at(0) != '#')
+    return;
+  _ChannelIt target = _getChannel(targetName);
+  if (target == _channels.end()) {
+    client.sendMsg(NumReply::noSushChannel(client, targetName));
+    return;
+  }
+  
+  if (cmd.getParams().size() == 1) { // GET target's mode 
+    
+  } else { // SET target's mode
+    
+  }
 }

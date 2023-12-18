@@ -3,9 +3,8 @@
 
 unsigned long Channel::_idCount = 0;
 
-Channel::Channel(Client &author, const std::string name)
-    : _author(author), _name(name) {
-  //TODO check if the name is rule compliant
+Channel::Channel(Client &author, const std::string name, const std::string key)
+    : _author(author), _name(name), _key(key) {
 }
 
 Channel::Channel(const Channel &copy) : _author(copy._author) { *this = copy; }
@@ -17,7 +16,7 @@ Channel &Channel::operator=(const Channel &rhs) {
 
   _author = rhs._author;
   _name = rhs._name;
-  _pwd = rhs._pwd;
+  _key = rhs._key;
   _members = rhs._members;
   _membersInveted = rhs._membersInveted;
   _operators = rhs._operators;
@@ -25,7 +24,6 @@ Channel &Channel::operator=(const Channel &rhs) {
   _memberLimit = rhs._memberLimit;
   _onInvite = rhs._onInvite;
   _topicProtection = rhs._topicProtection;
-  _onPwd = rhs._onPwd;
   return *this;
 }
 

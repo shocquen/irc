@@ -19,6 +19,7 @@ nc -vC 127.0.0.1 8080 // At the moment
   - password
     - I think there is restrictions?
 
+Must finish MODE and check JOIN implement with MODE
 
 ## Cmds
 - [x] PASS
@@ -30,6 +31,7 @@ nc -vC 127.0.0.1 8080 // At the moment
 *Channel*
 - [ ] KICK
 - [ ] INVITE
+- [x] NAMES
 - [x] TOPIC
 - [ ] MODE
   - i: Set/remove Invite-only channel

@@ -25,6 +25,25 @@ public:
                                chan.getTopic());
   }
 
+  static std::string channelModIs(const Client &client, const Channel &chan) {
+    std::ostringstream modes;
+    std::ostringstream args;
+    modes << "+";
+    if (chan.isOnInvite())
+      modes << "i";
+    if (chan.isTopicProtected())
+      modes << "t";
+    if (chan.getKey().empty() == false)
+      modes << "k";
+    if (chan.getMemberLimit() != 0) {
+      modes << "l";
+      args << chan.getMemberLimit();
+    }
+
+    return _Builder("324", client.getNick() + " " + chan.getName() + " " +
+                               modes.str() + " " + args.str());
+  }
+
   static std::string namReply(const Client &client, const Channel &chan) {
     std::ostringstream oss;
     oss << client.getNick() << " = ";
@@ -39,9 +58,10 @@ public:
   }
   /* =========================================================================
    */
-  static std::string noSushChannel(const Client &client, const std::string chanName) {
-    return _Builder("403", client.getNick() + " " + chanName +
-                               " :No sush channel");
+  static std::string noSushChannel(const Client &client,
+                                   const std::string chanName) {
+    return _Builder("403",
+                    client.getNick() + " " + chanName + " :No sush channel");
   }
 
   static std::string noSuchNick(const Cmd &cmd) {
@@ -50,9 +70,10 @@ public:
                                " :No such nick/channel");
   }
 
-  static std::string userNotInChannel(const Client &client, std::string nick, const Channel &chan) {
-    return _Builder("442", client.getNick() + " " + nick +  " " + chan.getName() +
-                               " :You're not on that channel");
+  static std::string userNotInChannel(const Client &client, std::string nick,
+                                      const Channel &chan) {
+    return _Builder("442", client.getNick() + " " + nick + " " +
+                               chan.getName() + " :You're not on that channel");
   }
 
   static std::string notOnChannel(const Client &client, const Channel &chan) {
@@ -92,6 +113,14 @@ public:
 
   static std::string notRegistered(const Client &client) {
     return _Builder("451", client.getNick() + " :You have not registered");
+  }
+
+  static std::string badChannelKey(std::string chanName) {
+    return _Builder("475", chanName + " :Cannot join channel (+k)");
+  }
+
+  static std::string badChanMask(std::string chanName) {
+    return _Builder("476", chanName + " :Bad channel Mask");
   }
 
   static std::string chanOPrivsNeeded(const Client &client,
