@@ -19,6 +19,7 @@ std::map<std::string, Server::CmdMiddleWare> Server::initCmdHandlers() {
   m["TOPIC"] = (Server::CmdMiddleWare){true, &Server::_handleTOPIC};
   m["KICK"] = (Server::CmdMiddleWare){true, &Server::_handleKICK};
   m["NAMES"] = (Server::CmdMiddleWare){true, &Server::_handleNAMES};
+  m["MODE"] = (Server::CmdMiddleWare){true, &Server::_handleMODE};
   return m;
 }
 
@@ -143,12 +144,17 @@ void Server::_handleJOIN(const Cmd &cmd) {
     return;
   }
   
-  std::string name = cmd.getParams().front();
-  _ChannelIt chan = _getChannel(name);
-  if (chan != _channels.end()) { // There is already a Chan
+  std::string chanName = cmd.getParams().front();
+  if (chanName[0] != '#') {
+    client.sendMsg(NumReply::badChanMask(chanName));
+    return;
+  }
+
+  _ChannelIt chan = _getChannel(chanName);
+  if (chan != _channels.end()) { // The chan already exist
     chan->addMember(&client);
-  } else {
-    Channel newChan(client, name);
+  } else { // Create a chan
+    Channel newChan(client, chanName);
     newChan.addMember(&client);
     _channels.push_back(newChan);
     chan = _getChannel(newChan);
@@ -258,4 +264,9 @@ void Server::_handleNAMES(const Cmd &cmd) {
   }
 
   client.sendMsg(NumReply::namReply(client, *chan));
+}
+
+void Server::_handleMODE(const Cmd &cmd) {
+  Client &client = cmd.getAuthor();
+  (void)client;
 }

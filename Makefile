@@ -89,6 +89,7 @@ Cmd.cpp \
 Server/cmdHandlers.cpp \
 Server/Execption.cpp \
 Server/Server.cpp \
+Server/methods.cpp \
 Channel/Channel.cpp \
 Channel/methods.cpp \
 
