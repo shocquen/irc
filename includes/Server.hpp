@@ -32,6 +32,8 @@ public:
   typedef void (Server::*CmdFuncPtr)(const Cmd &);
   typedef struct {
     bool mustRegistered;
+    // bool mustOnChannel;
+    // bool mustPrivileges;
     CmdFuncPtr func;
   } CmdMiddleWare;
 
@@ -66,6 +68,9 @@ private:
   void _handlePING(const Cmd &cmd);
   void _handlePRIVMSG(const Cmd &cmd);
   void _handleJOIN(const Cmd &cmd);
+  void _handleTOPIC(const Cmd &cmd);
+  void _handleKICK(const Cmd &cmd);
+  void _handleNAMES(const Cmd &cmd);
   // void _handleCAP(const Cmd &cmd);
 
   static std::map<std::string, Server::CmdMiddleWare> initCmdHandlers();

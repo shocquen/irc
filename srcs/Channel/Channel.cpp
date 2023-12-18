@@ -24,7 +24,7 @@ Channel &Channel::operator=(const Channel &rhs) {
   _id = rhs._id;
   _memberLimit = rhs._memberLimit;
   _onInvite = rhs._onInvite;
-  _topicRestriction = rhs._topicRestriction;
+  _topicProtection = rhs._topicProtection;
   _onPwd = rhs._onPwd;
   return *this;
 }

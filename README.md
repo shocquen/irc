@@ -30,7 +30,7 @@ nc -vC 127.0.0.1 8080 // At the moment
 *Channel*
 - [ ] KICK
 - [ ] INVITE
-- [ ] TOPIC
+- [x] TOPIC
 - [ ] MODE
   - i: Set/remove Invite-only channel
   - t: Set/remove the restrictions of the TOPIC command to channel operators

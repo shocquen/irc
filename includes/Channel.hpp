@@ -14,7 +14,7 @@ public:
   bool operator==(const Channel &rhs) const;
 /* ========================================================================= */
   void addMember(Client *);
-  void kickMember(const Client &);
+  void kickMember(const Client &member, const Client &op, std::string);
   void banMember(Client *);
   void unBanMember(const Client &);
   void inviteMember(Client *);
@@ -23,9 +23,9 @@ public:
   void addOperator(Client *);
   void rmOperator(const Client &);
 /* ------------------------------------------------------------------------- */
-  void toogleOnInvite();
-  void toogleTopicRestriction();
-  void toogleOnPwd();
+  void toggleOnInvite();
+  void toggleTopicProtection();
+  void toggleOnPwd();
 /* ------------------------------------------------------------------------- */
   void setName(std::string);
   void setTopic(std::string topic);
@@ -39,7 +39,8 @@ public:
   bool isBannedMember(const Client &) const;
   bool isInvitedMember(const Client &) const;
   bool isOperator(const Client &)const;
-  bool hasPerm(const Client &) const;
+  bool ClientHasPriv(const Client &) const;
+  bool isTopicProtected() const;
 /* ========================================================================= */
   void sendMsg(std::string msg) const;
   void sendMsg(const Client &author, std::string msg) const;
@@ -59,7 +60,7 @@ private:
   unsigned long        _id;
   unsigned long        _memberLimit;
   bool                 _onInvite;
-  bool                 _topicRestriction;
+  bool                 _topicProtection;
   bool                 _onPwd;
 /* ========================================================================= */
   typedef std::vector<Client*>::const_iterator _ClientConstIt;
