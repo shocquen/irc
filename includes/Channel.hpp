@@ -39,6 +39,7 @@ public:
   bool isBannedMember(const Client &) const;
   bool isInvitedMember(const Client &) const;
   bool isOperator(const Client &)const;
+  bool hasPerm(const Client &) const;
 /* ========================================================================= */
   void sendMsg(std::string msg) const;
   void sendMsg(const Client &author, std::string msg) const;

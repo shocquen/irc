@@ -63,7 +63,7 @@ std::string Channel::getTopic() const {
 std::string Channel::listMembers() const {
   std::ostringstream oss;
   for (_ClientConstIt it = _members.begin(); it != _members.end(); it++) {
-    if (getAuthor() == it || isOperator(*(*it)))
+    if (hasPerm(*(*it)))
       oss << "@";
     oss << (*it)->getNick() << " ";
   }
@@ -88,6 +88,10 @@ bool Channel::isInvitedMember(const Client &c) const {
 bool Channel::isOperator(const Client &c) const {
   _ClientConstIt target = std::find(_operators.begin(), _operators.end(), &c);
   return (target != _operators.end());
+}
+
+bool Channel::hasPerm(const Client &c) const {
+  return (getAuthor() == c || isOperator(c));
 }
 /* ========================================================================= */
 void Channel::sendMsg(std::string msg) const {
