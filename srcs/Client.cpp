@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "Colors.hpp"
 #include "NumReply.hpp"
 #include "Server.hpp"
 #include <cerrno>
@@ -108,7 +109,7 @@ void Client::disconnect(std::string ctx) {
 }
 
 void Client::sendMsg(std::string msg) const {
-  std::cout << "-> " << *this << ": " << msg << std::endl;
+  std::cout << FGRN("-> ") << *this << ": " << msg << std::endl;
   msg += "\r\n";
   send(_pfd.fd, msg.c_str(), msg.size(), MSG_DONTWAIT);
 }

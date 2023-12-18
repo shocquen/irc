@@ -2,6 +2,7 @@
 #include "NumReply.hpp"
 #include "Utils.hpp"
 #include "irc.hpp"
+#include "Colors.hpp"
 
 Server::Server(std::string pwd, unsigned short port) {
   _pwd = pwd;
@@ -83,7 +84,8 @@ void Server::run() {
 
       std::vector<std::string> msgs = client->bufferToMsgs();
       for (size_t i = 0; i < msgs.size(); i++) {
-        std::cout << *client << ": " << msgs[i]
+        // LOG IN CMD
+        std::cout << FMAG("<- ") << *client << ": " << msgs[i]
                   << std::endl;
 
         Cmd cmd(*client, msgs[i]);
