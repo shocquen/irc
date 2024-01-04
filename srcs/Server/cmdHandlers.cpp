@@ -10,19 +10,19 @@
 #include <vector>
 
 std::map<std::string, Server::CmdMiddleWare> Server::initCmdHandlers() {
-  std::map<std::string, Server::CmdMiddleWare> m;
-  m["PASS"] = (Server::CmdMiddleWare){.mustRegistered = false,
+  std::map<std::string, Server::CmdMiddleWare> ret;
+  ret["PASS"] = (Server::CmdMiddleWare){.mustRegistered = false,
                                       .func = &Server::_handlePASS};
-  m["NICK"] = (Server::CmdMiddleWare){false, &Server::_handleNICK};
-  m["USER"] = (Server::CmdMiddleWare){false, &Server::_handleUSER};
-  m["PING"] = (Server::CmdMiddleWare){true, &Server::_handlePING};
-  m["PRIVMSG"] = (Server::CmdMiddleWare){true, &Server::_handlePRIVMSG};
-  m["JOIN"] = (Server::CmdMiddleWare){true, &Server::_handleJOIN};
-  m["TOPIC"] = (Server::CmdMiddleWare){true, &Server::_handleTOPIC};
-  m["KICK"] = (Server::CmdMiddleWare){true, &Server::_handleKICK};
-  m["NAMES"] = (Server::CmdMiddleWare){true, &Server::_handleNAMES};
-  m["MODE"] = (Server::CmdMiddleWare){true, &Server::_handleMODE};
-  return m;
+  ret["NICK"] = (Server::CmdMiddleWare){false, &Server::_handleNICK};
+  ret["USER"] = (Server::CmdMiddleWare){false, &Server::_handleUSER};
+  ret["PING"] = (Server::CmdMiddleWare){true, &Server::_handlePING};
+  ret["PRIVMSG"] = (Server::CmdMiddleWare){true, &Server::_handlePRIVMSG};
+  ret["JOIN"] = (Server::CmdMiddleWare){true, &Server::_handleJOIN};
+  ret["TOPIC"] = (Server::CmdMiddleWare){true, &Server::_handleTOPIC};
+  ret["KICK"] = (Server::CmdMiddleWare){true, &Server::_handleKICK};
+  ret["NAMES"] = (Server::CmdMiddleWare){true, &Server::_handleNAMES};
+  ret["MODE"] = (Server::CmdMiddleWare){true, &Server::_handleMODE};
+  return ret;
 }
 
 const std::map<std::string, Server::CmdMiddleWare> Server::_cmdHandlers =
@@ -148,9 +148,12 @@ void Server::_handleJOIN(const Cmd &cmd) {
   }
 
   std::vector<std::string> names = split(cmd.getParams().front(), ",");
-  std::vector<std::string> keys = split(cmd.getParams().at(1), ",");
-  if (names.size() != keys.size())
-    return;
+  std::vector<std::string> keys;
+  if (cmd.getParams().size() > 1) {
+    keys = split(cmd.getParams().at(1), ",");
+    if (names.size() != keys.size())
+      return;
+  }
   std::vector<std::string>::const_iterator nameIt, keyIt;
   for (nameIt = names.begin(), keyIt = keys.begin();
        nameIt != names.end() && keyIt != keys.end(); nameIt++, keyIt++) {
@@ -158,7 +161,8 @@ void Server::_handleJOIN(const Cmd &cmd) {
       continue;
 
     _ChannelIt chan = _getChannel(*nameIt);
-    if (chan != _channels.end()) { // The chan already exist
+    if (chan != _channels.end()) { 
+      // The chan already exist
       // TODO check onIvite chan
       if (chan->getKey() == *keyIt)
         chan->addMember(&client);
@@ -166,7 +170,8 @@ void Server::_handleJOIN(const Cmd &cmd) {
         client.sendMsg(NumReply::badChannelKey(chan->getName()));
         continue;
       }
-    } else { // Create a chan
+    } else {
+      // Create a chan
       _addNewChannel(client, *nameIt, *keyIt);
       chan = _getChannel(*nameIt);
     }
