@@ -73,7 +73,7 @@ int Client::setUsername(std::string username) {
     return 1;
 
   _username = username;
-  std::cout << *this << " set his username to " << username << std::endl;
+  std::cout << *this << " set they username to " << username << std::endl;
   return 0;
 }
 
@@ -87,14 +87,14 @@ int Client::setNick(std::string nick) {
   if (nick.find(":") != nick.npos)
     return 1;
 
-  std::cout << *this << " changed his nickname to " << nick << std::endl;
+  std::cout << *this << " changed they nickname to " << nick << std::endl;
   _nick = nick;
   return 0;
 }
 
 void Client::setRealName(std::string realName) {
   _realName = realName;
-  std::cout << *this << " set his real name to " << realName << std::endl;
+  std::cout << *this << " set they real name to " << realName << std::endl;
 }
 
 /* ------------------------------------------------------------------------- */
