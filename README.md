@@ -2,7 +2,11 @@
 *Connect to ircserv*
 ```bash
 nc -vC <ip> <port>
-nc -vC 127.0.0.1 8080 // At the moment
+irssi -c <server> -p <port> -w <pwd> -n <name>
+
+# At the moment
+nc -vC 127.0.0.1 8080
+irssi -c 127.0.0.1 -p 8080 -w LLD -n sou
 ```
 
 # Documentations
@@ -12,8 +16,11 @@ nc -vC 127.0.0.1 8080 // At the moment
 [RPL ERR list](https://www.alien.net.au/irc/irc2numerics.html) 
 
 # TODO
+
+
+
 ## main
-- [ ] args parser                                                          *Sou*
+- [x] args parser                                                          *Sou*
   - port
     - is the arg only digit?
   - password
@@ -27,7 +34,9 @@ Must finish MODE and check JOIN implement with MODE
 - [x] USER
 - [x] PING
 - [x] PRIVMSG
-- [x] JOIN
+- [ ] JOIN
+  - create only one chan without any pwd
+  - check if you're invited before letting u join the chan
 *Channel*
 - [ ] KICK
 - [ ] INVITE
@@ -39,6 +48,7 @@ Must finish MODE and check JOIN implement with MODE
   - k: Set/remove the channel key (password)
   - o: Give/take channel operator privilege
   - l: Set/remove the user limit to channel
+  - handle if only target is sent in the params
 
 ## Bot
 ```bash
