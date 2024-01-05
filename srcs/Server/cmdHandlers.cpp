@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#define ACCEPTED_MODES "itkol"
 
 std::map<std::string, Server::CmdMiddleWare> Server::initCmdHandlers() {
   std::map<std::string, Server::CmdMiddleWare> ret;
@@ -275,7 +276,7 @@ void Server::_handleMODE(const Cmd &cmd) {
     client.sendMsg(NumReply::needMoreParams(cmd));
     return;
   }
-  std::string targetName = cmd.getParams().at(0);
+  std::string targetName = cmd.getParams().front();
   if (targetName.at(0) != '#')
     return;
   _ChannelIt target = _getChannel(targetName);
@@ -285,8 +286,13 @@ void Server::_handleMODE(const Cmd &cmd) {
   }
   
   if (cmd.getParams().size() == 1) { // GET target's mode 
-    
+    client.sendMsg(NumReply::channelModIs(client, *target));
   } else { // SET target's mode
-    
+    std::string modeStr = cmd.getParams().at(1);
+    std::string modeArgs = cmd.getParams().size() > 1 ? cmd.getParams().at(2) : "";
+    char mode;
+    for (int i = 0; i < modeStr.size(); i++) {
+      
+    }
   }
 }

@@ -17,8 +17,6 @@ irssi -c 127.0.0.1 -p 8080 -w LLD -n sou
 
 # TODO
 
-
-
 ## main
 - [x] args parser                                                          *Sou*
   - port
