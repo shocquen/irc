@@ -40,7 +40,7 @@ Must finish MODE and check JOIN implement with MODE
 - [ ] INVITE
 - [x] NAMES
 - [x] TOPIC
-- [ ] MODE
+- [ ] MODE (channel only)
   - i: Set/remove Invite-only channel
   - t: Set/remove the restrictions of the TOPIC command to channel operators
   - k: Set/remove the channel key (password)
@@ -54,3 +54,42 @@ Must finish MODE and check JOIN implement with MODE
 ```
 - [ ] Register to server
 - [ ] Respond pong on PRIVMSG
+
+## Mon 15 Jan 24
+- [ ] MODE (channel only)
+```
+  if chan doesn't exist: ERR_NOSUCHCHANNEL
+  if no modestring: RPL_CHANNELMODEIS
+    if client is not a chan's member dont send chan's key
+  if modestring:
+    if client has no priv: ERR_CHANOPRIVSNEEDED
+
+    Invite Only: +i
+      no arg
+    Topic Protected: +t
+      no arg
+    Key: +k
+      arg string
+    Operator Priv: +o
+      arg string
+    Client Limit: +l
+      arg int
+
+  At the end: send MODE cmd to all members
+```
+- [ ] JOIN
+  - handle multiple and solo creation / join chans
+
+```cpp
+  #include<iostream>
+  #include<algorithm>
+
+  using namespace std;
+  main() {
+    string my_str = "ABAABACCABA";
+
+    cout << "Initial string: " << my_str << endl;
+
+    my_str.erase(remove(my_str.begin(), my_str.end(), 'A'), my_str.end()); //remove A from string
+    cout << "Final string: " << my_str;
+  }```
