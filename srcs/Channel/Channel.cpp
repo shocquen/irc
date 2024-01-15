@@ -5,6 +5,7 @@ unsigned long Channel::_idCount = 0;
 
 Channel::Channel(Client &author, const std::string name, const std::string key)
     : _author(author), _name(name), _key(key) {
+  _topicProtection = true;
 }
 
 Channel::Channel(const Channel &copy) : _author(copy._author) { *this = copy; }
