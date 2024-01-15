@@ -5,6 +5,10 @@ unsigned long Channel::_idCount = 0;
 
 Channel::Channel(Client &author, const std::string name, const std::string key)
     : _author(author), _name(name), _key(key) {
+  _id = _idCount++;
+
+  _memberLimit = 0;
+  _onInvite = false;
   _topicProtection = true;
 }
 
@@ -14,6 +18,7 @@ Channel::~Channel(){};
 
 Channel &Channel::operator=(const Channel &rhs) {
   _id = _idCount++;
+  // _id = rhs._id;
 
   _author = rhs._author;
   _name = rhs._name;
@@ -21,7 +26,6 @@ Channel &Channel::operator=(const Channel &rhs) {
   _members = rhs._members;
   _membersInveted = rhs._membersInveted;
   _operators = rhs._operators;
-  _id = rhs._id;
   _memberLimit = rhs._memberLimit;
   _onInvite = rhs._onInvite;
   _topicProtection = rhs._topicProtection;
