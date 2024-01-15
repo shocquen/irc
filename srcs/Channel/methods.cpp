@@ -101,7 +101,7 @@ bool Channel::isInvitedMember(const Client &c) const {
 
 bool Channel::isOperator(const Client &c) const {
   _ClientConstIt target = std::find(_operators.begin(), _operators.end(), &c);
-  return (target != _operators.end());
+  return (target != _operators.end() || c == _author);
 }
 
 bool Channel::ClientHasPriv(const Client &c) const {

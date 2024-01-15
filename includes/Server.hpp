@@ -64,7 +64,7 @@ private:
   
   /* -------------------------------------------------------------------------
    */
-  void _addNewChannel(Client &client, const std::string name,
+  void _addChannel(Client &client, const std::string name,
                       const std::string key);
   const _ChannelConstIt _getConstChannel(std::string name) const;
   const _ChannelIt _getChannel(std::string name);

@@ -1,8 +1,10 @@
 #include "Cmd.hpp"
+#include "Colors.hpp"
 #include "NumReply.hpp"
 #include "Server.hpp"
 #include "Utils.hpp"
 #include "irc.hpp"
+#include <iostream>
 #define BUFFER_SIZE 5
 
 void Server::_acceptNewClient() {
@@ -67,7 +69,7 @@ Server::_ClientIt Server::_getClient(std::string nick) {
   return it;
 }
 
-void Server::_addNewChannel(Client &client, const std::string name,
+void Server::_addChannel(Client &client, const std::string name,
                             const std::string key) {
   
   Channel newChan(client, name, key);
@@ -83,11 +85,8 @@ const Server::_ChannelConstIt Server::_getConstChannel(std::string name) const {
 }
 
 const Server::_ChannelIt Server::_getChannel(std::string name) {
-  for (_ChannelIt it = _channels.begin(); it != _channels.end(); it++) {
-    if (*it == name)
-      return it;
-  }
-  return _channels.end();
+  _ChannelIt it = std::find(_channels.begin(), _channels.end(), name);
+  return it;
 }
 
 const Server::_ChannelIt Server::_getChannel(const Channel &rhs) {

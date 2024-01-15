@@ -44,9 +44,7 @@ bool Channel::operator==(const Channel &rhs) const {
 
 // std::ostream &operator<<(std::ostream &stream, const Channel &c) {
 //   stream << "Channel " << c.getName() << std::endl;
-//   stream << "members: ";
-//   for(Channel::ClientConstIt it = )
-  
+//   stream << "key: " << c.getKey() << std::endl;
 //   return stream;
 // }
 

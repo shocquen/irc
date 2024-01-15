@@ -1,6 +1,7 @@
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "Cmd.hpp"
+#include "Colors.hpp"
 #include "NumReply.hpp"
 #include "Server.hpp"
 #include "Utils.hpp"
@@ -149,32 +150,37 @@ void Server::_handleJOIN(const Cmd &cmd) {
     return;
   }
 
-  std::vector<std::string> names = split(cmd.getParams().front(), ",");
+  const std::vector<std::string> names = split(cmd.getParams().front(), ",");
   std::vector<std::string> keys;
   if (cmd.getParams().size() > 1) {
     keys = split(cmd.getParams().at(1), ",");
     if (names.size() != keys.size())
       return;
   }
-  std::vector<std::string>::const_iterator nameIt, keyIt;
-  for (nameIt = names.begin(), keyIt = keys.begin();
-       nameIt != names.end() && keyIt != keys.end(); nameIt++, keyIt++) {
+
+  std::vector<std::string>::const_iterator nameIt;
+  size_t index = 0;
+  for (nameIt = names.begin();
+       nameIt != names.end(); nameIt++, index++) {
     if (nameIt->empty())
       continue;
 
     _ChannelIt chan = _getChannel(*nameIt);
+    const std::string key = index >= keys.size() ? "" : keys[index];
     if (chan != _channels.end()) {
       // The chan already exist
-      // TODO check onIvite chan
-      if (chan->getKey() == *keyIt)
-        chan->addMember(&client);
-      else {
+      if (chan->isOnInvite() && chan->isInvitedMember(client) == false) {
+        client.sendMsg(NumReply::inviteOnlyChan(client, chan->getName()));
+        continue;
+      }
+      if (chan->getKey() != key) {
         client.sendMsg(NumReply::badChannelKey(chan->getName()));
         continue;
       }
+      chan->addMember(&client);
     } else {
       // Create a chan
-      _addNewChannel(client, *nameIt, *keyIt);
+      _addChannel(client, *nameIt, key);
       chan = _getChannel(*nameIt);
     }
 
@@ -291,19 +297,23 @@ void Server::_handleMODE(const Cmd &cmd) {
   if (cmd.getParams().size() == 1) {
     client.sendMsg(NumReply::channelModIs(client, *target));
     return;
+  } else if (target->isOperator(client) == false) {
+    client.sendMsg(NumReply::chanOPrivsNeeded(client, *target));
+    return ;
   }
 
   const std::string modeStr = cmd.getParams().at(1);
   // Modestring must start with '-' or '+'
   if (modeStr[0] != '+' && modeStr[0] != '-')
     return;
-  const std::string modeArgs =
-      cmd.getParams().size() > 1 ? cmd.getParams().at(2) : "";
-  const std::vector<std::string> args = split(modeArgs, ",");
+  std::vector<std::string> args;
+  if (cmd.getParams().size() == 3)
+    args = split(cmd.getParams().at(2), ",");
 
   const std::string ACCEPTED_MODES = "itkol";
   const std::string PLUSMINUS = "+-";
   const std::string ACCEPTED_CHARS = ACCEPTED_MODES + PLUSMINUS;
+
   char modeSet = 0;
   size_t index = 0;
   for (std::string::const_iterator it = modeStr.begin(); it != modeStr.end();
@@ -355,4 +365,17 @@ void Server::_handleMODE(const Cmd &cmd) {
       index++;
     }
   }
+  std::ostringstream ctx;
+  std::ostringstream ctxArgs;
+  if (target->isOnInvite())
+    ctx << "i";
+  if (target->isTopicProtected())
+    ctx << "t";
+  if (target->getKey().empty() == false)
+    ctx << "k";
+  if (target->getMemberLimit() != 0) {
+    ctx << "l ";
+    ctxArgs << target->getMemberLimit();
+  }
+  target->sendMsg(":localhost MODE " + target->getName() + " " + ctx.str() + " " + ctxArgs.str());
 }
