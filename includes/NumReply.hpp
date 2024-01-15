@@ -28,7 +28,6 @@ public:
   static std::string channelModIs(const Client &client, const Channel &chan) {
     std::ostringstream modes;
     std::ostringstream args;
-    modes << "+";
     if (chan.isOnInvite())
       modes << "i";
     if (chan.isTopicProtected())
