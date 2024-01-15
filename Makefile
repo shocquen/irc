@@ -103,7 +103,8 @@ NAME		= ircserv
 RM			= rm -rf
 CC			= c++
 AR			= ar -rcs
-CFLAGS		= -Wall -Wextra -Werror -g3 -std=c++98 -fsanitize=address 
+CFLAGS		= -Wall -Wextra -Werror -g3 -std=c++98  
+CFLAGS		+= -fsanitize=address
 
 
 ${NAME}:	$(addprefix obj/, $(OBJS))
