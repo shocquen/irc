@@ -5,15 +5,16 @@
 #include "Server.hpp"
 #include "Utils.hpp"
 #include <cstddef>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <vector>
-#define ACCEPTED_MODES "itkol"
 
 std::map<std::string, Server::CmdMiddleWare> Server::initCmdHandlers() {
   std::map<std::string, Server::CmdMiddleWare> ret;
   ret["PASS"] = (Server::CmdMiddleWare){.mustRegistered = false,
-                                      .func = &Server::_handlePASS};
+                                        .func = &Server::_handlePASS};
   ret["NICK"] = (Server::CmdMiddleWare){false, &Server::_handleNICK};
   ret["USER"] = (Server::CmdMiddleWare){false, &Server::_handleUSER};
   ret["PING"] = (Server::CmdMiddleWare){true, &Server::_handlePING};
@@ -162,7 +163,7 @@ void Server::_handleJOIN(const Cmd &cmd) {
       continue;
 
     _ChannelIt chan = _getChannel(*nameIt);
-    if (chan != _channels.end()) { 
+    if (chan != _channels.end()) {
       // The chan already exist
       // TODO check onIvite chan
       if (chan->getKey() == *keyIt)
@@ -276,6 +277,7 @@ void Server::_handleMODE(const Cmd &cmd) {
     client.sendMsg(NumReply::needMoreParams(cmd));
     return;
   }
+  // Is the target a channel that exist?
   std::string targetName = cmd.getParams().front();
   if (targetName.at(0) != '#')
     return;
@@ -284,15 +286,73 @@ void Server::_handleMODE(const Cmd &cmd) {
     client.sendMsg(NumReply::noSushChannel(client, targetName));
     return;
   }
-  
-  if (cmd.getParams().size() == 1) { // GET target's mode 
+
+  // If no modestring just reply RPL_CHANNELMODEIS
+  if (cmd.getParams().size() == 1) {
     client.sendMsg(NumReply::channelModIs(client, *target));
-  } else { // SET target's mode
-    std::string modeStr = cmd.getParams().at(1);
-    std::string modeArgs = cmd.getParams().size() > 1 ? cmd.getParams().at(2) : "";
-    char mode;
-    for (int i = 0; i < modeStr.size(); i++) {
-      
+    return;
+  }
+
+  const std::string modeStr = cmd.getParams().at(1);
+  // Modestring must start with '-' or '+'
+  if (modeStr[0] != '+' && modeStr[0] != '-')
+    return;
+  const std::string modeArgs =
+      cmd.getParams().size() > 1 ? cmd.getParams().at(2) : "";
+  const std::vector<std::string> args = split(modeArgs, ",");
+
+  const std::string ACCEPTED_MODES = "itkol";
+  const std::string PLUSMINUS = "+-";
+  const std::string ACCEPTED_CHARS = ACCEPTED_MODES + PLUSMINUS;
+  char modeSet = 0;
+  size_t index = 0;
+  for (std::string::const_iterator it = modeStr.begin(); it != modeStr.end();
+       it++) {
+    if (ACCEPTED_CHARS.find(*it) == ACCEPTED_CHARS.npos) {
+      continue;
+    }
+    if (PLUSMINUS.find(*it) != PLUSMINUS.npos) {
+      modeSet = *it;
+    }
+    switch (*it) {
+    case 'i':
+      if ((modeSet == '+' && target->isOnInvite() == false) ||
+          (modeSet == '-' && target->isOnInvite() == true)) {
+        target->toggleOnInvite();
+      }
+      break;
+    case 't':
+      if ((modeSet == '+' && target->isTopicProtected() == false) ||
+          (modeSet == '-' && target->isTopicProtected() == true)) {
+        target->toggleTopicProtection();
+      }
+      break;
+    case 'k':
+      if (modeSet == '-') {
+        target->setKey("");
+      } else if (args.size() >= index) {
+        target->setKey(args[index]);
+      }
+      break;
+    case 'l':
+      if (modeSet == '+' && args.size() >= index) {
+        // target->setMemberLimit(std::stoul(args[index]));
+        target->setMemberLimit(std::strtoul(args[index].c_str(), NULL, 10));
+      } else if (modeSet == '-') {
+        target->setMemberLimit(0);
+      }
+      break;
+    }
+    if (*it == 'o' && args.size() >= index) {
+      _ClientIt it = _getClient(args[index]);
+      if (modeSet == '-') {
+        target->rmOperator(*it);
+      } else {
+        target->addOperator(&(*it));
+      }
+    }
+    if (ACCEPTED_MODES.find(*it) != ACCEPTED_MODES.npos) {
+      index++;
     }
   }
 }
