@@ -57,14 +57,14 @@ bool Server::_isNickUsed(std::string nick) const {
   return (false);
 }
 
-const Server::_ClientConstIt Server::_getConstClient(std::string nick) const {
-  for (_ClientConstIt it = _clients.begin(); it != _clients.end(); it++) {
-    if (it->isRegistered() == false)
-      continue;
-    if (*it == nick)
-      return it;
-  }
-  return _clients.end();
+Server::_ClientConstIt Server::_getConstClient(std::string nick) const {
+  _ClientConstIt it = std::find(_clients.begin(), _clients.end(), nick);
+  return it;
+}
+
+Server::_ClientIt Server::_getClient(std::string nick) {
+  _ClientIt it = std::find(_clients.begin(), _clients.end(), nick);
+  return it;
 }
 
 void Server::_addNewChannel(Client &client, const std::string name,

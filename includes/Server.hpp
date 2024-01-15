@@ -59,7 +59,9 @@ private:
   // Return 1 if there is one or more complete msgs to treat.
   // Else return 0.
   int _readFromClient(const _ClientIt &client);
-  const _ClientConstIt _getConstClient(std::string nick) const;
+  _ClientConstIt _getConstClient(std::string nick) const;
+  _ClientIt _getClient(std::string nick);
+  
   /* -------------------------------------------------------------------------
    */
   void _addNewChannel(Client &client, const std::string name,
