@@ -32,10 +32,15 @@ public:
       modes << "i";
     if (chan.isTopicProtected())
       modes << "t";
-    if (chan.getKey().empty() == false)
+    if (chan.getKey().empty() == false) {
       modes << "k";
+      if (chan.isOperator(client))
+        args << chan.getKey();
+    }
     if (chan.getMemberLimit() != 0) {
       modes << "l";
+      if (args.rdbuf()->in_avail())
+        args << ",";
       args << chan.getMemberLimit();
     }
 
@@ -112,6 +117,12 @@ public:
 
   static std::string notRegistered(const Client &client) {
     return _Builder("451", client.getNick() + " :You have not registered");
+  }
+
+  static std::string inviteOnlyChan(const Client &client,
+                                    const std::string chanName) {
+    return _Builder("473", client.getNick() + " " + chanName +
+                               " :Cannot join channel (+i)");
   }
 
   static std::string badChannelKey(std::string chanName) {
