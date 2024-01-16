@@ -48,7 +48,13 @@ public:
                                modes.str() + " " + args.str());
   }
 
-  static std::string namReply(const Client &client, const Channel &chan) {
+  static std::string inviting(const Client &client, const std::string nick,
+                              const Channel &chan) {
+    return _Builder("341",
+                    client.getNick() + " " + nick + " " + chan.getName());
+  }
+
+  static std::string nameReply(const Client &client, const Channel &chan) {
     std::ostringstream oss;
     oss << client.getNick() << " = ";
     oss << chan.getName();
@@ -85,6 +91,12 @@ public:
                                " :You're not on that channel");
   }
 
+  static std::string userOnChannel(const Client &client, const std::string nick,
+                                   const Channel &chan) {
+    return _Builder("443", client.getNick() + " " + nick + " " +
+                               chan.getName() + " :is already on channel");
+  }
+
   static std::string needMoreParams(const Cmd &cmd) {
     std::ostringstream oss;
     oss << cmd.getAuthor().getNick() << " ";
@@ -119,14 +131,20 @@ public:
     return _Builder("451", client.getNick() + " :You have not registered");
   }
 
+  static std::string channelIsFull(const Client &client, const Channel &chan) {
+    return _Builder("471", client.getNick() + " " + chan.getName() +
+                               " :Cannot join channel (+l)");
+  }
+
   static std::string inviteOnlyChan(const Client &client,
                                     const std::string chanName) {
     return _Builder("473", client.getNick() + " " + chanName +
                                " :Cannot join channel (+i)");
   }
 
-  static std::string badChannelKey(std::string chanName) {
-    return _Builder("475", chanName + " :Cannot join channel (+k)");
+  static std::string badChannelKey(const Client &client, std::string chanName) {
+    return _Builder("475", client.getNick() + " " + chanName +
+                               " :Cannot join channel (+k)");
   }
 
   static std::string badChanMask(std::string chanName) {
