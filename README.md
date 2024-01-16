@@ -32,15 +32,15 @@ Must finish MODE and check JOIN implement with MODE
 - [x] USER
 - [x] PING
 - [x] PRIVMSG
-- [ ] JOIN
+- [x] JOIN
   - create only one chan without any pwd
   - check if you're invited before letting u join the chan
 *Channel*
-- [ ] KICK
-- [ ] INVITE
+- [x] KICK
+- [x] INVITE
 - [x] NAMES
 - [x] TOPIC
-- [ ] MODE (channel only)
+- [x] MODE (channel only)
   - i: Set/remove Invite-only channel
   - t: Set/remove the restrictions of the TOPIC command to channel operators
   - k: Set/remove the channel key (password)
@@ -55,25 +55,26 @@ Must finish MODE and check JOIN implement with MODE
 - [ ] Register to server
 - [ ] Respond pong on PRIVMSG
 
+# Days
 ## Mon 15 Jan 24
-- [ ] MODE (channel only)
-```
+- [x] MODE (channel only)
   if chan doesn't exist: ERR_NOSUCHCHANNEL
   if no modestring: RPL_CHANNELMODEIS
     if client is not a chan's member dont send chan's key
   if modestring:
     if client has no priv: ERR_CHANOPRIVSNEEDED
-
-    Invite Only: +i
-      no arg
-    Topic Protected: +t
-      no arg
-    Key: +k
-      arg string
-    Operator Priv: +o
-      arg string
-    Client Limit: +l
-      arg int
-
+  Invite Only: +i
+    no arg
+  Topic Protected: +t
+    no arg
+  Key: +k
+    arg string
+  Operator Priv: +o
+    arg string
+  Client Limit: +l
+    arg int
   At the end: send MODE cmd to all members
-```
+
+## Tue 16 Jan 24
+- [x] INVITE
+
