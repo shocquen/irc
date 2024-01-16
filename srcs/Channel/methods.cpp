@@ -3,6 +3,7 @@
 #include "Cmd.hpp"
 #include "NumReply.hpp"
 #include <algorithm>
+#include <cstddef>
 #include <sstream>
 #include <vector>
 
@@ -81,6 +82,7 @@ std::string Channel::listMembers() const {
 }
 
 unsigned long Channel::getMemberLimit() const { return _memberLimit; }
+size_t Channel::getMemberCount() const { return _members.size(); }
 /* ------------------------------------------------------------------------- */
 bool Channel::isMember(const Client &c) const {
   _ClientConstIt target = std::find(_members.begin(), _members.end(), &c);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Cmd.hpp"
+#include <cstddef>
 #include <ostream>
 #include <string>
 class Channel {
@@ -37,6 +38,7 @@ public:
   std::string getTopic() const;
   std::string listMembers() const;
   unsigned long getMemberLimit() const;
+  size_t getMemberCount() const;
 /* ------------------------------------------------------------------------- */
   bool isMember(const Client &) const;
   bool isBannedMember(const Client &) const;
