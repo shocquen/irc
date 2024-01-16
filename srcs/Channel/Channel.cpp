@@ -17,14 +17,12 @@ Channel::Channel(const Channel &copy) : _author(copy._author) { *this = copy; }
 Channel::~Channel(){};
 
 Channel &Channel::operator=(const Channel &rhs) {
-  _id = _idCount++;
-  // _id = rhs._id;
-
+  _id = rhs._id;
   _author = rhs._author;
   _name = rhs._name;
   _key = rhs._key;
   _members = rhs._members;
-  _membersInveted = rhs._membersInveted;
+  _membersInvited = rhs._membersInvited;
   _operators = rhs._operators;
   _memberLimit = rhs._memberLimit;
   _onInvite = rhs._onInvite;
@@ -35,6 +33,10 @@ Channel &Channel::operator=(const Channel &rhs) {
 /* ========================================================================= */
 bool Channel::operator==(const std::string name) const {
   return (_name == name);
+}
+
+bool Channel::operator==(unsigned long id) const {
+  return (_id == id);
 }
 
 bool Channel::operator==(const Channel &rhs) const {

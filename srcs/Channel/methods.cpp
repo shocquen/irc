@@ -23,9 +23,19 @@ void Channel::setMemberLimit(unsigned long limit) { _memberLimit = limit; }
 /* ========================================================================= */
 void Channel::addMember(Client *m) { _members.push_back(m); }
 
+void Channel::rmMember(const Client &client) {
+  if (_members.empty())
+    return;
+  _ClientIt it = std::find(_members.begin(), _members.end(), &client);
+  if (it != _members.end())
+    _members.erase(it);
+}
+
 void Channel::kickMember(const Client &m, const Client &op, std::string ctx) {
   std::vector<Client *>::iterator it =
       std::find(_members.begin(), _members.end(), &m);
+  if (it == _members.end())
+    return;
   if (ctx.empty())
     ctx = "is kicked";
 
@@ -34,12 +44,19 @@ void Channel::kickMember(const Client &m, const Client &op, std::string ctx) {
   _members.erase(it);
 }
 
-void Channel::inviteMember(Client *m) { _membersInveted.push_back(m); }
+void Channel::kickAll() {
+  while (_members.size()) {
+    if (_members.front()->getId() != _author.getId())
+      kickMember(*_members.front(), _author, "Author left chan");
+  }
+}
+
+void Channel::inviteMember(Client *m) { _membersInvited.push_back(m); }
 
 void Channel::unInviteMember(const Client &m) {
-  std::vector<Client *>::iterator it =
-      std::find(_membersInveted.begin(), _membersInveted.end(), &m);
-  _membersInveted.erase(it);
+  _ClientIt it = std::find(_membersInvited.begin(), _membersInvited.end(), &m);
+  if (it != _membersInvited.end())
+    _membersInvited.erase(it);
 }
 
 void Channel::banMember(Client *m) { _membersBanned.push_back(m); }
@@ -52,10 +69,12 @@ void Channel::unBanMember(const Client &m) {
 /* ------------------------------------------------------------------------- */
 void Channel::addOperator(Client *m) { _operators.push_back(m); }
 
-void Channel::rmOperator(const Client &m) {
-  std::vector<Client *>::iterator it =
-      std::find(_operators.begin(), _operators.end(), &m);
-  _operators.erase(it);
+void Channel::rmOperator(const Client &client) {
+  if (_operators.empty())
+    return;
+  _ClientIt it = std::find(_operators.begin(), _operators.end(), &client);
+  if (it != _operators.end())
+    _operators.erase(it);
 }
 /* ========================================================================= */
 void Channel::toggleOnInvite() { _onInvite = !_onInvite; }
@@ -63,6 +82,8 @@ void Channel::toggleOnInvite() { _onInvite = !_onInvite; }
 void Channel::toggleTopicProtection() { _topicProtection = !_topicProtection; }
 
 /* ========================================================================= */
+unsigned long Channel::getId() const { return _id; }
+
 Client &Channel::getAuthor() const { return _author; }
 
 std::string Channel::getName() const { return _name; }
@@ -97,13 +118,13 @@ bool Channel::isBannedMember(const Client &c) const {
 
 bool Channel::isInvitedMember(const Client &c) const {
   _ClientConstIt target =
-      std::find(_membersInveted.begin(), _membersInveted.end(), &c);
-  return (target != _membersInveted.end());
+      std::find(_membersInvited.begin(), _membersInvited.end(), &c);
+  return (target != _membersInvited.end());
 }
 
 bool Channel::isOperator(const Client &c) const {
   _ClientConstIt target = std::find(_operators.begin(), _operators.end(), &c);
-  return (target != _operators.end() || c == _author);
+  return (target != _operators.end());
 }
 
 bool Channel::ClientHasPriv(const Client &c) const {

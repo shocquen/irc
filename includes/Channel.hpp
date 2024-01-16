@@ -12,10 +12,13 @@ public:
   Channel &operator=(const Channel &rhs);
 
   bool operator==(const std::string name) const;
+  bool operator==(unsigned long id) const;
   bool operator==(const Channel &rhs) const;
 /* ========================================================================= */
   void addMember(Client *);
+  void rmMember(const Client &client);
   void kickMember(const Client &member, const Client &op, std::string);
+  void kickAll();
   void banMember(Client *);
   void unBanMember(const Client &);
   void inviteMember(Client *);
@@ -32,6 +35,7 @@ public:
   void setTopic(std::string topic);
   void setMemberLimit(unsigned long memberLimit);
 /* ========================================================================= */
+  unsigned long getId() const;
   Client &getAuthor() const;
   std::string getName() const;
   std::string getKey() const;
@@ -61,7 +65,7 @@ private:
   std::string          _topic;
   std::vector<Client*> _members;
   std::vector<Client*> _membersBanned;
-  std::vector<Client*> _membersInveted;
+  std::vector<Client*> _membersInvited;
   std::vector<Client*> _operators;
   unsigned long        _id;
   unsigned long        _memberLimit;

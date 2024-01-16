@@ -4,7 +4,9 @@
 #include "Server.hpp"
 #include "Utils.hpp"
 #include "irc.hpp"
+#include <cstddef>
 #include <iostream>
+#include <ostream>
 #define BUFFER_SIZE 5
 
 void Server::_acceptNewClient() {
@@ -25,6 +27,22 @@ void Server::_disconnectClient(Client &client, std::string ctx) {
   _ClientIt target =
       std::find(_clients.begin(), _clients.end(), client.getPfd().fd);
   if (target != _clients.end()) {
+    std::vector<int> chanIdToDel;
+    for (_ChannelIt chanIt = _channels.begin(); chanIt != _channels.end(); chanIt++) {
+      chanIt->rmOperator(client);
+      chanIt->rmMember(client);
+      chanIt->unInviteMember(client);
+      if (chanIt->getAuthor() == *target) {
+        chanIdToDel.push_back(chanIt->getId());
+      }
+    }
+    for (std::vector<int>::iterator it = chanIdToDel.begin(); it != chanIdToDel.end(); it++) {
+      _ChannelIt chanIt = _getChannel(*it);
+      if (chanIt != _channels.end()) {
+        chanIt->kickAll();
+        _channels.erase(chanIt);
+      }
+    }
     client.sendMsg("ERROR :" + ctx);
     client.disconnect(ctx);
     _clients.erase(target);
@@ -76,6 +94,7 @@ void Server::_addChannel(Client &client, const std::string name,
   newChan.addMember(&client);
   _channels.push_back(newChan);
 }
+
 const Server::_ChannelConstIt Server::_getConstChannel(std::string name) const {
   for (_ChannelConstIt it = _channels.begin(); it != _channels.end(); it++) {
     if (*it == name)
@@ -86,6 +105,11 @@ const Server::_ChannelConstIt Server::_getConstChannel(std::string name) const {
 
 const Server::_ChannelIt Server::_getChannel(std::string name) {
   _ChannelIt it = std::find(_channels.begin(), _channels.end(), name);
+  return it;
+}
+
+const Server::_ChannelIt Server::_getChannel(unsigned long id) {
+  _ChannelIt it = std::find(_channels.begin(), _channels.end(), id);
   return it;
 }
 

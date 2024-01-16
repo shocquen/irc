@@ -26,6 +26,7 @@ std::map<std::string, Server::CmdMiddleWare> Server::initCmdHandlers() {
   ret["NAMES"] = (Server::CmdMiddleWare){true, &Server::_handleNAMES};
   ret["MODE"] = (Server::CmdMiddleWare){true, &Server::_handleMODE};
   ret["INVITE"] = (Server::CmdMiddleWare){true, &Server::_handleINVITE};
+  ret["QUIT"] = (Server::CmdMiddleWare){true, &Server::_handleQUIT};
   return ret;
 }
 
@@ -305,7 +306,7 @@ void Server::_handleMODE(const Cmd &cmd) {
   if (cmd.getParams().size() == 1) {
     client.sendMsg(NumReply::channelModIs(client, *target));
     return;
-  } else if (target->isOperator(client) == false) {
+  } else if (target->ClientHasPriv(client) == false) {
     client.sendMsg(NumReply::chanOPrivsNeeded(client, *target));
     return ;
   }
@@ -406,7 +407,7 @@ void Server::_handleINVITE(const Cmd &cmd) {
     client.sendMsg(NumReply::notOnChannel(client, *chan));
     return;
   }
-  if (chan->isOnInvite() && chan->isOperator(client) == false) {
+  if (chan->isOnInvite() && chan->ClientHasPriv(client) == false) {
     client.sendMsg(NumReply::chanOPrivsNeeded(client, *chan));
     return;
   }
@@ -424,3 +425,10 @@ void Server::_handleINVITE(const Cmd &cmd) {
   client.sendMsg(NumReply::inviting(client, invitedClient->getNick(), *chan));
   invitedClient->sendMsg(":" + client.getNick() + "@localhost INVITE " + invitedClient->getNick() + " " + chan->getName());
 }
+
+void Server::_handleQUIT(const Cmd &cmd) {
+  Client &client = cmd.getAuthor();
+
+  _disconnectClient(client, cmd.getParams().empty() ? "" : cmd.getParams().front());
+}
+

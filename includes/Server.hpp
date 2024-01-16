@@ -68,6 +68,7 @@ private:
                       const std::string key);
   const _ChannelConstIt _getConstChannel(std::string name) const;
   const _ChannelIt _getChannel(std::string name);
+  const _ChannelIt _getChannel(unsigned long int);
   const _ChannelIt _getChannel(const Channel &rhs);
   /* -------------------------------------------------------------------------
    */
@@ -92,6 +93,7 @@ private:
   void _handleNAMES(const Cmd &cmd);
   void _handleMODE(const Cmd &cmd);
   void _handleINVITE(const Cmd &cmd);
+  void _handleQUIT(const Cmd &cmd);
   // void _handleCAP(const Cmd &cmd);
 
   static std::map<std::string, Server::CmdMiddleWare> initCmdHandlers();
