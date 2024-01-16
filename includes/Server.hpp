@@ -91,6 +91,7 @@ private:
   void _handleKICK(const Cmd &cmd);
   void _handleNAMES(const Cmd &cmd);
   void _handleMODE(const Cmd &cmd);
+  void _handleINVITE(const Cmd &cmd);
   // void _handleCAP(const Cmd &cmd);
 
   static std::map<std::string, Server::CmdMiddleWare> initCmdHandlers();

@@ -25,6 +25,7 @@ std::map<std::string, Server::CmdMiddleWare> Server::initCmdHandlers() {
   ret["KICK"] = (Server::CmdMiddleWare){true, &Server::_handleKICK};
   ret["NAMES"] = (Server::CmdMiddleWare){true, &Server::_handleNAMES};
   ret["MODE"] = (Server::CmdMiddleWare){true, &Server::_handleMODE};
+  ret["INVITE"] = (Server::CmdMiddleWare){true, &Server::_handleINVITE};
   return ret;
 }
 
@@ -169,15 +170,22 @@ void Server::_handleJOIN(const Cmd &cmd) {
     const std::string key = index >= keys.size() ? "" : keys[index];
     if (chan != _channels.end()) {
       // The chan already exist
+      if (chan->getMemberLimit() && chan->getMemberCount() >= chan->getMemberLimit()) {
+        client.sendMsg(NumReply::channelIsFull(client, *chan));
+        return;
+      }
       if (chan->isOnInvite() && chan->isInvitedMember(client) == false) {
         client.sendMsg(NumReply::inviteOnlyChan(client, chan->getName()));
         continue;
       }
       if (chan->getKey() != key) {
-        client.sendMsg(NumReply::badChannelKey(chan->getName()));
+        client.sendMsg(NumReply::badChannelKey(client, chan->getName()));
         continue;
       }
       chan->addMember(&client);
+      if (chan->isInvitedMember(client)) {
+        chan->unInviteMember(client);
+      }
     } else {
       // Create a chan
       _addChannel(client, *nameIt, key);
@@ -188,7 +196,7 @@ void Server::_handleJOIN(const Cmd &cmd) {
                   "@localhost " + "JOIN " + chan->getName());
     if (chan->getTopic().empty() == false)
       client.sendMsg(NumReply::topic(client, *chan));
-    client.sendMsg(NumReply::namReply(client, *chan));
+    client.sendMsg(NumReply::nameReply(client, *chan));
     client.sendMsg(NumReply::endOfNames(client, *chan));
   }
 }
@@ -274,7 +282,7 @@ void Server::_handleNAMES(const Cmd &cmd) {
     return;
   }
 
-  client.sendMsg(NumReply::namReply(client, *chan));
+  client.sendMsg(NumReply::nameReply(client, *chan));
 }
 
 void Server::_handleMODE(const Cmd &cmd) {
@@ -324,6 +332,7 @@ void Server::_handleMODE(const Cmd &cmd) {
     if (PLUSMINUS.find(*it) != PLUSMINUS.npos) {
       modeSet = *it;
     }
+
     switch (*it) {
     case 'i':
       if ((modeSet == '+' && target->isOnInvite() == false) ||
@@ -340,12 +349,12 @@ void Server::_handleMODE(const Cmd &cmd) {
     case 'k':
       if (modeSet == '-') {
         target->setKey("");
-      } else if (args.size() >= index) {
+      } else if (args.size() > index) {
         target->setKey(args[index]);
       }
       break;
     case 'l':
-      if (modeSet == '+' && args.size() >= index) {
+      if (modeSet == '+' && args.size() > index) {
         // target->setMemberLimit(std::stoul(args[index]));
         target->setMemberLimit(std::strtoul(args[index].c_str(), NULL, 10));
       } else if (modeSet == '-') {
@@ -353,7 +362,7 @@ void Server::_handleMODE(const Cmd &cmd) {
       }
       break;
     }
-    if (*it == 'o' && args.size() >= index) {
+    if (*it == 'o' && args.size() > index) {
       _ClientIt it = _getClient(args[index]);
       if (modeSet == '-') {
         target->rmOperator(*it);
@@ -378,4 +387,40 @@ void Server::_handleMODE(const Cmd &cmd) {
     ctxArgs << target->getMemberLimit();
   }
   target->sendMsg(":localhost MODE " + target->getName() + " " + ctx.str() + " " + ctxArgs.str());
+}
+
+void Server::_handleINVITE(const Cmd &cmd) {
+  Client &client = cmd.getAuthor();
+
+  if (cmd.getParams().size() != 2) {
+    client.sendMsg(NumReply::needMoreParams(cmd));
+    return;
+  }
+
+  _ChannelIt chan = _getChannel(cmd.getParams().at(1));
+  if (chan == _channels.end()) {
+    client.sendMsg(NumReply::noSushChannel(client, cmd.getParams().at(1)));
+    return;
+  }
+  if (chan->isMember(client) == false) {
+    client.sendMsg(NumReply::notOnChannel(client, *chan));
+    return;
+  }
+  if (chan->isOnInvite() && chan->isOperator(client) == false) {
+    client.sendMsg(NumReply::chanOPrivsNeeded(client, *chan));
+    return;
+  }
+
+  _ClientIt invitedClient = _getClient(cmd.getParams().front());
+  if (invitedClient == _clients.end()) {
+    return;
+  }
+  if (chan->isMember(*invitedClient)) {
+    client.sendMsg(NumReply::userOnChannel(client, invitedClient->getNick(), *chan));
+    return;
+  }
+
+  chan->inviteMember(&(*invitedClient));
+  client.sendMsg(NumReply::inviting(client, invitedClient->getNick(), *chan));
+  invitedClient->sendMsg(":" + client.getNick() + "@localhost INVITE " + invitedClient->getNick() + " " + chan->getName());
 }
