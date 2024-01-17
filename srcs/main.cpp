@@ -5,18 +5,20 @@
 
 #include <csignal>
 #include <sstream>
+#include <string>
 
 #define BUFFER_SIZE 2024
 int status_g = 0;
 
-static void argsParser(char **argv, std::string *pwd, unsigned short *port) {
-    std::istringstream iss(argv[1]);
-    // TODO check if all argv[1] is digit and if it superior at 0;
-    // askljdksja dasdj  jaskljd klasjdkl jasldjlasjd jajklas jklasjd kl
-    // jkldjasl jlkasdjlkasjd ljasdljj
-    iss >> *port;
-    *pwd = argv[2];
-}
+typedef struct Args {
+    Args(char **data) {
+        std::istringstream iss(data[1]);
+        iss >> port;
+        pwd = data[2];
+    }
+    unsigned short port;
+    std::string    pwd;
+} Args;
 
 static void sigintHandler(int signum) {
     status_g = signum;
@@ -25,14 +27,10 @@ static void sigintHandler(int signum) {
 int main(int argc, char **argv) {
     if (argc != 3)
         return (EXIT_FAILURE);
-
     signal(SIGINT, sigintHandler);
-    unsigned short port;
-    std::string    pwd;
-    argsParser(argv, &pwd, &port);
-
+    Args args(argv);
     try {
-        Server server(pwd, port);
+        Server server(args.pwd, args.port);
         server.run();
         server.stop();
     } catch (Server::ServerException &err) {
