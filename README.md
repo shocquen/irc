@@ -4,10 +4,16 @@
 nc -vC <ip> <port>
 irssi -c <server> -p <port> -w <pwd> -n <name>
 
-# At the moment
+# Default
 nc -vC 127.0.0.1 8080
 irssi -c 127.0.0.1 -p 8080 -w LLD -n sou
 ```
+
+```
+  /dcc send <nick> <path from home>
+  /dcc get <nick>
+```
+
 
 # Documentations
 [Sockets](https://www.geeksforgeeks.org/socket-programming-cc)
@@ -54,4 +60,10 @@ Must finish MODE and check JOIN implement with MODE
 ```
 - [ ] Register to server
 - [ ] Respond pong on PRIVMSG
+
+## Wed 17 Jan 24
+BUGS:
+- better compare clients
+- /mode +o nickThatDoesntExist => crash
+
 
