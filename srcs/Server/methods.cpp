@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <iostream>
 #include <ostream>
-#define BUFFER_SIZE 5
+#define BUFFER_SIZE 1024
 
 void Server::_acceptNewClient() {
     int                newSocket;
@@ -61,7 +61,6 @@ int Server::_readFromClient(const _ClientIt &client) {
     if (s == -1) {
         throw ServerException("recv", errno);
     }
-
     if (s == 0) {
         client->disconnect("");
         _clients.erase(client);

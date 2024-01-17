@@ -90,7 +90,7 @@ void Server::run() {
                                       to_string(pfds[i].fd));
             }
 
-            if (_readFromClient(client) == 0) // If now complete msg
+            if (_readFromClient(client) == 0) // If not complete msg
                 continue;
 
             std::vector<std::string> msgs = client->bufferToMsgs();

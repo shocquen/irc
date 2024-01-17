@@ -1,10 +1,12 @@
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "Cmd.hpp"
+#include "Colors.hpp"
 #include "NumReply.hpp"
 
 #include <algorithm>
 #include <cstddef>
+#include <iostream>
 #include <sstream>
 #include <vector>
 
@@ -82,6 +84,8 @@ void Channel::unBanMember(const Client &m) {
 }
 /* ------------------------------------------------------------------------- */
 void Channel::addOperator(Client *m) {
+    std::cout << KGRN << _name << ": new modo: " << m->getNick() << RST
+              << std::endl;
     _operators.push_back(m);
 }
 
@@ -89,8 +93,11 @@ void Channel::rmOperator(const Client &client) {
     if (_operators.empty())
         return;
     _ClientIt it = std::find(_operators.begin(), _operators.end(), &client);
-    if (it != _operators.end())
+    if (it != _operators.end()) {
+        std::cout << KRED << _name << ": rm modo: " << client.getNick() << RST
+                  << std::endl;
         _operators.erase(it);
+    }
 }
 /* ========================================================================= */
 void Channel::toggleOnInvite() {

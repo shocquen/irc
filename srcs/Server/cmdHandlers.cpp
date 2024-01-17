@@ -70,9 +70,18 @@ void Server::_handleNICK(const Cmd &cmd) {
         client.sendMsg(NumReply::nicknameInUse(cmd));
         return;
     }
+    std::string oldNick = client.getNick();
     if (client.setNick(nick)) {
         client.sendMsg(NumReply::erroneusNickname(cmd));
         return;
+    } else if (client.isRegistered()) {
+        for (_ClientConstIt it = _clients.begin(); it != _clients.end(); it++) {
+            if (*it == client)
+                continue;
+            it->sendMsg(":" + oldNick + "!" + client.getUsername() +
+                        "@localhost NICK " + client.getNick());
+        }
+        client.sendMsg(":" + oldNick + " NICK " + client.getNick());
     }
 
     if (client.getUsername().empty() == false) {
@@ -326,8 +335,10 @@ void Server::_handleMODE(const Cmd &cmd) {
     const std::string PLUSMINUS      = "+-";
     const std::string ACCEPTED_CHARS = ACCEPTED_MODES + PLUSMINUS;
 
-    char   modeSet = 0;
-    size_t index   = 0;
+    char               modeSet = 0;
+    size_t             index   = 0;
+    std::ostringstream ctx;
+    std::ostringstream ctxArgs;
     for (std::string::const_iterator it = modeStr.begin(); it != modeStr.end();
          it++) {
         if (ACCEPTED_CHARS.find(*it) == ACCEPTED_CHARS.npos) {
@@ -342,19 +353,23 @@ void Server::_handleMODE(const Cmd &cmd) {
             if ((modeSet == '+' && target->isOnInvite() == false) ||
                 (modeSet == '-' && target->isOnInvite() == true)) {
                 target->toggleOnInvite();
+                ctx << modeSet << "i";
             }
             break;
         case 't':
             if ((modeSet == '+' && target->isTopicProtected() == false) ||
                 (modeSet == '-' && target->isTopicProtected() == true)) {
                 target->toggleTopicProtection();
+                ctx << modeSet << "t";
             }
             break;
         case 'k':
             if (modeSet == '-') {
                 target->setKey("");
+                ctx << "-k";
             } else if (args.size() > index) {
                 target->setKey(args[index]);
+                ctx << "+k";
             }
             break;
         case 'l':
@@ -362,8 +377,13 @@ void Server::_handleMODE(const Cmd &cmd) {
                 // target->setMemberLimit(std::stoul(args[index]));
                 target->setMemberLimit(
                     std::strtoul(args[index].c_str(), NULL, 10));
+                ctx << "+l";
+                if (ctxArgs.tellp())
+                    ctxArgs << ",";
+                ctxArgs << target->getMemberLimit();
             } else if (modeSet == '-') {
                 target->setMemberLimit(0);
+                ctx << "-l";
             }
             break;
         }
@@ -371,25 +391,21 @@ void Server::_handleMODE(const Cmd &cmd) {
             _ClientIt it = _getClient(args[index]);
             if (modeSet == '-') {
                 target->rmOperator(*it);
+                ctx << "-o";
+                if (ctxArgs.tellp())
+                    ctxArgs << ",";
+                ctxArgs << it->getNick();
             } else {
                 target->addOperator(&(*it));
+                ctx << "+o";
+                if (ctxArgs.tellp())
+                    ctxArgs << ",";
+                ctxArgs << it->getNick();
             }
         }
         if (ACCEPTED_MODES.find(*it) != ACCEPTED_MODES.npos) {
             index++;
         }
-    }
-    std::ostringstream ctx;
-    std::ostringstream ctxArgs;
-    if (target->isOnInvite())
-        ctx << "i";
-    if (target->isTopicProtected())
-        ctx << "t";
-    if (target->getKey().empty() == false)
-        ctx << "k";
-    if (target->getMemberLimit() != 0) {
-        ctx << "l ";
-        ctxArgs << target->getMemberLimit();
     }
     target->sendMsg(":localhost MODE " + target->getName() + " " + ctx.str() +
                     " " + ctxArgs.str());
