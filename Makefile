@@ -128,8 +128,9 @@ obj_bot/%.o:	aBot/%.cpp
 			@mkdir -p $(@D)
 			$(call compiling,$<,$@,0)
 
-all:	 $(NAME) $(BOT_NAME)
+all:	$(NAME) $(BOT_NAME)
 
+bot:	$(BOT_NAME)
 clean:	
 			$(call removing, obj)
 			$(call removing, obj_bot)
@@ -146,4 +147,4 @@ signe:
 			@echo
 
 -include $(DEPS)
-.PHONY : 	all clean fclean re
+.PHONY : 	all clean fclean re bot
