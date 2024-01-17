@@ -1,9 +1,12 @@
 #include "Server.hpp"
 
 #include "Colors.hpp"
+#include "Ip.hpp"
 #include "NumReply.hpp"
 #include "Utils.hpp"
 #include "irc.hpp"
+
+#include <iostream>
 
 Server::Server(std::string pwd, unsigned short port) {
     _pwd  = pwd;
@@ -35,7 +38,11 @@ Server::Server(std::string pwd, unsigned short port) {
         close(_fd);
         throw ServerException("listen", errno);
     }
-    std::cout << "New server listenning on port " << port << std::endl;
+    const Host host;
+    std::cout << "Server running\n"
+              << "\thostname: " << KYEL << host.name << RST "\n\tip: " << KYEL
+              << host.IP << RST "\n\tport: " << KYEL << port << RST
+              << std::endl;
 }
 
 Server::Server(const Server &copy) {
