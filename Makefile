@@ -66,7 +66,7 @@ endef
 
 define linking
 	@echo "$(shell tput bold)$(shell tput setaf 2)Linking $1 $(shell tput sgr0)\c"
-	@$(CC) $(CFLAGS) -I$(INC) $(addprefix obj/, $(OBJS)) -o $(NAME)
+	@$(CC) $(CFLAGS) -I$(INC) $2 -o $1
 	@echo "$(shell tput bold)$(shell tput setaf 2)√$(shell tput sgr0)"
 endef
 
@@ -86,6 +86,7 @@ SRCS		= main.cpp \
 Client.cpp \
 Utils.cpp \
 Cmd.cpp \
+ip.cpp \
 Server/cmdHandlers.cpp \
 Server/Execption.cpp \
 Server/Server.cpp \
@@ -93,13 +94,18 @@ Server/methods.cpp \
 Channel/Channel.cpp \
 Channel/methods.cpp \
 
+SRCS_BOT = main.cpp
+
 
 OBJS		= $(SRCS:.cpp=.o)
 DEPS		= $(addprefix obj/, $(OBJS:.o=.d))
+OBJS_BOT		= $(SRCS_BOT:.cpp=.o)
+DEPS_BOT		= $(addprefix obj_bot/, $(OBJS_BOT:.o=.d))
 
 INC		= ./includes
 
 NAME		= ircserv
+BOT_NAME	= Astarion
 RM			= rm -rf
 CC			= c++
 AR			= ar -rcs
@@ -108,20 +114,28 @@ CFLAGS		= -Wall -Wextra -Werror -g3 -std=c++98
 
 
 ${NAME}:	$(addprefix obj/, $(OBJS))
-			$(call linking,$(NAME))
+			$(call linking,$(NAME), $(addprefix obj/, $(OBJS)))
 -include $(DEPS);
 
 obj/%.o:	srcs/%.cpp
 			@mkdir -p $(@D)
 			$(call compiling,$<,$@,0)
 
-all:	 $(NAME)
+${BOT_NAME}:	$(addprefix obj_bot/, $(OBJS_BOT))
+			$(call linking,$(BOT_NAME) $(addprefix obj_bot/, $(OBJS_BOT)))
+
+obj_bot/%.o:	aBot/%.cpp
+			@mkdir -p $(@D)
+			$(call compiling,$<,$@,0)
+
+all:	 $(NAME) $(BOT_NAME)
 
 clean:	
 			$(call removing, obj)
 
 fclean:		clean
 			$(call removing, $(NAME))
+			$(call removing, $(BOT_NAME))
 
 re:		fclean 
 			@make all
