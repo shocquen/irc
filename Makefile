@@ -132,6 +132,7 @@ all:	 $(NAME) $(BOT_NAME)
 
 clean:	
 			$(call removing, obj)
+			$(call removing, obj_bot)
 
 fclean:		clean
 			$(call removing, $(NAME))
