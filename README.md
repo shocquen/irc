@@ -66,4 +66,7 @@ BUGS:
 - better compare clients
 - /mode +o nickThatDoesntExist => crash
 
+## Mon 22 Jan 24
+No bugs know
+Need to check befaute final push
 
