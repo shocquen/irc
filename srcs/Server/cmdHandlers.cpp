@@ -308,18 +308,18 @@ void Server::_handleMODE(const Cmd &cmd) {
     std::string targetName = cmd.getParams().front();
     if (targetName.at(0) != '#')
         return;
-    _ChannelIt target = _getChannel(targetName);
-    if (target == _channels.end()) {
+    _ChannelIt chan = _getChannel(targetName);
+    if (chan == _channels.end()) {
         client.sendMsg(NumReply::noSushChannel(client, targetName));
         return;
     }
 
     // If no modestring just reply RPL_CHANNELMODEIS
     if (cmd.getParams().size() == 1) {
-        client.sendMsg(NumReply::channelModIs(client, *target));
+        client.sendMsg(NumReply::channelModIs(client, *chan));
         return;
-    } else if (target->ClientHasPriv(client) == false) {
-        client.sendMsg(NumReply::chanOPrivsNeeded(client, *target));
+    } else if (chan->ClientHasPriv(client) == false) {
+        client.sendMsg(NumReply::chanOPrivsNeeded(client, *chan));
         return;
     }
 
@@ -328,87 +328,94 @@ void Server::_handleMODE(const Cmd &cmd) {
     if (modeStr[0] != '+' && modeStr[0] != '-')
         return;
     std::vector<std::string> args;
-    if (cmd.getParams().size() == 3)
-        args = split(cmd.getParams().at(2), ",");
+    for (size_t i = 2; i < cmd.getParams().size(); i++) {
+        args.push_back(cmd.getParams()[i]);
+    }
 
     const std::string ACCEPTED_MODES = "itkol";
     const std::string PLUSMINUS      = "+-";
     const std::string ACCEPTED_CHARS = ACCEPTED_MODES + PLUSMINUS;
 
-    char               modeSet = 0;
-    size_t             index   = 0;
+    char               modeCtx  = 0;
+    size_t             argIndex = 0;
     std::ostringstream ctx;
     std::ostringstream ctxArgs;
-    for (std::string::const_iterator it = modeStr.begin(); it != modeStr.end();
-         it++) {
-        if (ACCEPTED_CHARS.find(*it) == ACCEPTED_CHARS.npos) {
+    for (std::string::const_iterator modeChar = modeStr.begin();
+         modeChar != modeStr.end(); modeChar++) {
+        if (ACCEPTED_CHARS.find(*modeChar) == ACCEPTED_CHARS.npos) {
             continue;
         }
-        if (PLUSMINUS.find(*it) != PLUSMINUS.npos) {
-            modeSet = *it;
+        if (PLUSMINUS.find(*modeChar) != PLUSMINUS.npos) {
+            modeCtx = *modeChar;
         }
 
-        switch (*it) {
+        switch (*modeChar) {
         case 'i':
-            if ((modeSet == '+' && target->isOnInvite() == false) ||
-                (modeSet == '-' && target->isOnInvite() == true)) {
-                target->toggleOnInvite();
-                ctx << modeSet << "i";
+            if ((modeCtx == '+' && chan->isOnInvite() == false) ||
+                (modeCtx == '-' && chan->isOnInvite() == true)) {
+                chan->toggleOnInvite();
+                ctx << modeCtx << "i";
             }
             break;
         case 't':
-            if ((modeSet == '+' && target->isTopicProtected() == false) ||
-                (modeSet == '-' && target->isTopicProtected() == true)) {
-                target->toggleTopicProtection();
-                ctx << modeSet << "t";
+            if ((modeCtx == '+' && chan->isTopicProtected() == false) ||
+                (modeCtx == '-' && chan->isTopicProtected() == true)) {
+                chan->toggleTopicProtection();
+                ctx << modeCtx << "t";
             }
             break;
         case 'k':
-            if (modeSet == '-') {
-                target->setKey("");
+            if (modeCtx == '-') {
+                chan->setKey("");
                 ctx << "-k";
-            } else if (args.size() > index) {
-                target->setKey(args[index]);
+            } else if (args.size() > argIndex) {
+                chan->setKey(args[argIndex]);
+                argIndex++;
                 ctx << "+k";
             }
             break;
         case 'l':
-            if (modeSet == '+' && args.size() > index) {
+            if (modeCtx == '+' && args.size() > argIndex) {
                 // target->setMemberLimit(std::stoul(args[index]));
-                target->setMemberLimit(
-                    std::strtoul(args[index].c_str(), NULL, 10));
+                chan->setMemberLimit(
+                    std::strtoul(args[argIndex].c_str(), NULL, 10));
+                argIndex++;
                 ctx << "+l";
                 if (ctxArgs.tellp())
-                    ctxArgs << ",";
-                ctxArgs << target->getMemberLimit();
-            } else if (modeSet == '-') {
-                target->setMemberLimit(0);
+                    ctxArgs << " ";
+                ctxArgs << chan->getMemberLimit();
+            } else if (modeCtx == '-') {
                 ctx << "-l";
+                chan->setMemberLimit(0);
             }
             break;
         }
-        if (*it == 'o' && args.size() > index) {
-            _ClientIt it = _getClient(args[index]);
-            if (modeSet == '-') {
-                target->rmOperator(*it);
-                ctx << "-o";
-                if (ctxArgs.tellp())
-                    ctxArgs << ",";
-                ctxArgs << it->getNick();
+        if (*modeChar == 'o' && args.size() > argIndex) {
+            std::string tmpClientName = args[argIndex];
+            argIndex++;
+            _ClientIt target = _getClient(tmpClientName);
+            if (target == _clients.end()) {
+                client.sendMsg(
+                    NumReply::userNotInChannel(client, tmpClientName, *chan));
             } else {
-                target->addOperator(&(*it));
-                ctx << "+o";
-                if (ctxArgs.tellp())
-                    ctxArgs << ",";
-                ctxArgs << it->getNick();
+                if (modeCtx == '-') {
+                    chan->rmOperator(*target);
+                    ctx << "-o";
+                    if (ctxArgs.tellp())
+                        ctxArgs << " ";
+                    ctxArgs << target->getNick();
+                } else {
+                    chan->addOperator(&(*target));
+                    ctx << "+o";
+                    if (ctxArgs.tellp())
+                        ctxArgs << " ";
+                    ctxArgs << target->getNick();
+                }
             }
         }
-        if (ACCEPTED_MODES.find(*it) != ACCEPTED_MODES.npos) {
-            index++;
-        }
     }
-    target->sendMsg(":localhost MODE " + target->getName() + " " + ctx.str() +
-                    " " + ctxArgs.str());
+    chan->sendMsg(":" + client.getNick() + " MODE " + chan->getName() + " " +
+                  ctx.str() + " " + ctxArgs.str());
 }
 
 void Server::_handleINVITE(const Cmd &cmd) {
