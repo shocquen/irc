@@ -131,6 +131,7 @@ obj_bot/%.o:	aBot/%.cpp
 all:	$(NAME) $(BOT_NAME)
 
 bot:	$(BOT_NAME)
+
 clean:	
 			$(call removing, obj)
 			$(call removing, obj_bot)
