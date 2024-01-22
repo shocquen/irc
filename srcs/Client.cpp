@@ -30,13 +30,14 @@ Client::Client(const Client &copy) {
 }
 
 Client &Client::operator=(const Client &rhs) {
-    _id             = rhs._id;
-    _pfd            = rhs._pfd;
-    _isRegistered   = rhs._isRegistered;
     _GoodToRegister = rhs._GoodToRegister;
-    _username       = rhs._username;
+    _id             = rhs._id;
+    _isRegistered   = rhs._isRegistered;
     _nick           = rhs._nick;
+    _pfd            = rhs._pfd;
     _realName       = rhs._realName;
+    _username       = rhs._username;
+    _buffer         = rhs._buffer;
     return (*this);
 }
 
@@ -90,7 +91,7 @@ std::string Client::getRealName() const {
 void Client::setRegistered() {
     _isRegistered = true;
     std::cout << *this << " registered" << std::endl;
-    sendMsg(NumReply::wolcome(*this));
+    sendMsg(NumReply::welcome(*this));
 }
 
 void Client::setGoodToRegister() {

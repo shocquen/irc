@@ -10,7 +10,7 @@
 #include <string>
 class NumReply {
 public:
-    static std::string wolcome(const Client &client) {
+    static std::string welcome(const Client &client) {
         return _Builder("001", client.getNick() + " :Welcome to ft_irc " +
                                    client.getNick() + "!" +
                                    client.getUsername() + "@localhost");
@@ -40,8 +40,8 @@ public:
         }
         if (chan.getMemberLimit() != 0) {
             modes << "l";
-            if (args.rdbuf()->in_avail())
-                args << ",";
+            if (args.tellp())
+                args << " ";
             args << chan.getMemberLimit();
         }
 
