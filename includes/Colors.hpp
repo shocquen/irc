@@ -2,6 +2,7 @@
 #define _COLORS_
 
 /* FOREGROUND */
+#include "NumReply.hpp"
 #define RST     "\x1B[0m"
 #define KBLA    "\x1B[30m"
 #define KRED    "\x1B[31m"
@@ -45,4 +46,37 @@
 #define ITL(x)  "\x1B[3m" x RST
 #define UNDL(x) "\x1B[4m" x RST
 
+class Color {
+public:
+    static std::string black(std::string str) {
+        return KBLA + str + RST;
+    };
+    static std::string red(std::string str) {
+        return KRED + str + RST;
+    };
+    static std::string green(std::string str) {
+        return KGRN + str + RST;
+    };
+    static std::string yellow(std::string str) {
+        return KYEL + str + RST;
+    };
+    static std::string blue(std::string str) {
+        return KBLU + str + RST;
+    };
+    static std::string magenta(std::string str) {
+        return KMAG + str + RST;
+    };
+    static std::string Cyan(std::string str) {
+        return KCYN + str + RST;
+    };
+    static std::string white(std::string str) {
+        return KWHT + str + RST;
+    };
+    class Background {
+    public:
+        static std::string black(std::string str) {
+            return KBBLA + str + RST;
+        }
+    };
+};
 #endif
