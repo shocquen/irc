@@ -12,7 +12,7 @@ Server::Server(std::string pwd, unsigned short port) {
     _pwd  = pwd;
     _port = port;
 
-    _fd = socket(AF_INET, SOCK_STREAM, 0);
+    _fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 
     if (_fd < 0) {
         throw ServerException("socket failed", errno);
