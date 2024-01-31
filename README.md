@@ -58,8 +58,8 @@ Must finish MODE and check JOIN implement with MODE
 ```bash
   ./bot <host> <port> <psw>
 ```
-- [ ] Register to server
-- [ ] Respond pong on PRIVMSG
+- [x] Register to server
+- [x] Respond pong on PRIVMSG
 
 ## Wed 17 Jan 24
 BUGS:
@@ -67,6 +67,4 @@ BUGS:
 - /mode +o nickThatDoesntExist => crash
 
 ## Mon 22 Jan 24
-No bugs know
-Need to check befaute final push
-
+Seems good
