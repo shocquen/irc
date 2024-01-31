@@ -84,7 +84,8 @@ void Server::_handleNICK(const Cmd &cmd) {
         client.sendMsg(":" + oldNick + " NICK " + client.getNick());
     }
 
-    if (client.getUsername().empty() == false) {
+    if (client.getUsername().empty() == false &&
+        client.isRegistered() == false) {
         client.setRegistered();
     }
 }
@@ -112,7 +113,7 @@ void Server::_handleUSER(const Cmd &cmd) {
     }
     client.setUsername(username);
     client.setRealName(realname);
-    if (client.getNick() != "*") {
+    if (client.getNick() != "*" && client.isRegistered() == false) {
         client.setRegistered();
     }
 }
