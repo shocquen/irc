@@ -1,9 +1,13 @@
 #include "Channel.hpp"
 #include "Cmd.hpp"
+#include "Colors.hpp"
 #include "Server.hpp"
 #include "irc.hpp"
 
 #include <csignal>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 #include <sstream>
 #include <string>
 
@@ -13,7 +17,13 @@ int status_g = 0;
 typedef struct Args {
     Args(char **data) {
         std::istringstream iss(data[1]);
-        iss >> port;
+        if (*data[1]) {
+            iss >> port;
+        } else {
+            port = 0;
+        }
+        if (iss.peek() != EOF)
+            port = 0;
         pwd = data[2];
     }
     unsigned short port;
@@ -29,6 +39,11 @@ int main(int argc, char **argv) {
         return (EXIT_FAILURE);
     signal(SIGINT, sigintHandler);
     Args args(argv);
+    if (args.port == 0) {
+        std::cerr << "ircserv: port number invalid: " << Color::red(argv[1])
+                  << std::endl;
+        return EXIT_FAILURE;
+    }
     try {
         Server server(args.pwd, args.port);
         server.run();
